@@ -167,6 +167,11 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     #     img_with_projected_lines = cv2.circle(img_with_projected_lines, original_point.astype(np.int32), 2, (0, 255, 0), thickness=-1)
     # cv2.imshow('img_with_projected_lines', img_with_projected_lines)
     # cv2.waitKey(0)
+    
+    # print("best_rtmse: ", best_rtmse)
+    # img_wrap = cv2.warpPerspective(image, np.linalg.inv(RT_matrix), (144, 312))
+    # cv2.imshow('img_wrap', img_wrap)
+    # cv2.waitKey(0)
     ### END VISUAL DEBUG ###
 
     for i in range(50000):
@@ -241,7 +246,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     cv2.waitKey(0)
     
     print("best_rtmse: ", best_rtmse)
-    img_wrap = cv2.warpPerspective(image, RT_matrix, (312, 144))
+    img_wrap = cv2.warpPerspective(image, np.linalg.inv(RT_matrix), (144, 312))
     cv2.imshow('img_wrap', img_wrap)
     cv2.waitKey(0)
 
