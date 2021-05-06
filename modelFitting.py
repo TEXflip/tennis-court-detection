@@ -24,7 +24,20 @@ import cv2
 import sys
 import random
 
-from lines import tennis_court_model_points
+from lines import tennis_court_model_points, tennis_court_model_lines
+
+from sklearn.mixture import GaussianMixture
+
+### VISUAL DEBUG ###
+# print(np.amax(tennis_court_model_points, axis=0).shape)
+# img_with_projected_lines = np.zeros(np.append(np.amax(tennis_court_model_points, axis=0)[[1,0]], [3]))
+# for line in tennis_court_model_lines:
+#    img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_model_points[line[0]], tennis_court_model_points[line[1]], (0, 255, 0), thickness=2)
+
+# cv2.imshow('model', img_with_projected_lines)
+# cv2.waitKey(0)
+
+### END VISUAL DEBUG ###
 
 def argument_parsing():
     parser = argparse.ArgumentParser(description='HAWP Testing')
@@ -73,26 +86,50 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     image = cv2.imread(impath)
     lines = get_lines_from_nn(cfg, impath, image[:, :, [2, 1, 0]], model, device, threshold)
 
-    img_with_lines = np.copy(image)
+    ### VISUAL DEBUG ###
+    # img_with_lines = np.copy(image)
+    # for line in lines:
+    #     line = line.astype(np.int32)
+    #     img_with_lines = cv2.line(img_with_lines, (line[0], line[1]), (line[2], line[3]), (255, 0, 0), 2)
+    #     img_with_lines = cv2.circle(img_with_lines, (line[0], line[1]), 2, (255, 80, 0), 3)
+    #     img_with_lines = cv2.circle(img_with_lines, (line[2], line[3]), 2, (255, 80, 0), 3)
+    # cv2.imshow('img_with_lines', img_with_lines)
+    # cv2.waitKey(0)
+    ### END VISUAL DEBUG ###
+
+    mask = np.zeros((image.shape[0], image.shape[1]), dtype=image.dtype)
     for line in lines:
         line = line.astype(np.int32)
-        img_with_lines = cv2.line(img_with_lines, (line[0], line[1]), (line[2], line[3]), (255, 0, 0), 2)
-        img_with_lines = cv2.circle(img_with_lines, (line[0], line[1]), 2, (255, 80, 0), 3)
-        img_with_lines = cv2.circle(img_with_lines, (line[2], line[3]), 2, (255, 80, 0), 3)
-    cv2.imshow('img_with_lines', img_with_lines)
-    cv2.waitKey(0)
+        mask = cv2.line(mask, (line[0], line[1]), (line[2], line[3]), 255, 8)
     
-    # points = np.float32(np.asarray([np.append(lines[:,0], lines[:, 2]), np.append(lines[:, 1], lines[:, 3])]).T)
+    ### VISUAL DEBUG ###
+    # cv2.imshow('mask', mask)
+    # cv2.waitKey(0)
+    ### END VISUAL DEBUG ###
+
+    mask = mask.astype(bool)
+    color_list = image[mask]
+    print(color_list.shape)
+    gm = GaussianMixture(n_components=3, random_state=0).fit(color_list)
+    line_gaussian = gm.predict([[255, 255, 255]])[0]
+    
+    flatten_color = image.reshape(-1, image.shape[-1])
+    fitted_gaussian = gm.predict(flatten_color)
+    candidate_lines = np.logical_and(mask, np.reshape(fitted_gaussian == line_gaussian, (image.shape[0], image.shape[1])))
+
     points = np.asarray([np.append(lines[:,0], lines[:,2]),np.append(lines[:,1], lines[:,3])]).T
+
     print(points.shape)
     print(tennis_court_model_points.shape)
 
-    img_with_points = np.copy(image)
-    for point in points:
-        point = point.astype(np.int32)
-        img_with_points = cv2.circle(img_with_points, (point[0], point[1]), 2, (255, 80, 0), 3)
-    cv2.imshow('img_with_points', img_with_points)
-    cv2.waitKey(0)
+    ### VISUAL DEBUG ###
+    # img_with_points = np.copy(image)
+    # for point in points:
+    #     point = point.astype(np.int32)
+    #     img_with_points = cv2.circle(img_with_points, (point[0], point[1]), 2, (255, 80, 0), 3)
+    # cv2.imshow('img_with_points', img_with_points)
+    # cv2.waitKey(0)
+    ### END VISUAL DEBUG ###
 
     tennis_court_model_points_reshaped = np.float32(tennis_court_model_points[:, np.newaxis, :])
     points_reshaped = np.float32(points[:, np.newaxis, :])
@@ -109,27 +146,73 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     """
 
     print(points.T.shape)
-    points_to_project = np.r_[points.T, np.zeros((1, points.shape[0]))]
+    points_to_project = np.r_[points.T, np.full((1, points.shape[0]), 1, dtype=points.dtype)]
 
     best_RT_matrix = None
     best_rtmse = sys.float_info.max
     best_fitting_points = []
 
-    for i in range(500000):
-        points_to_test = points[np.random.choice(points.shape[0], size=(4,), replace=False)]
+    original_points = np.asarray([[134,361],[662,369],[651,235],[292,235]])
+    tennis_court_point_idx = np.asarray([4,5,7,6])
+
+    print(np.amax(tennis_court_model_points, axis=0).shape)
+    img_with_projected_lines = np.zeros(np.append(np.amax(tennis_court_model_points, axis=0)[[1,0]], [3]))
+    for idx in tennis_court_point_idx:
+       img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_model_points[idx].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+
+    cv2.imshow('model', img_with_projected_lines)
+    cv2.waitKey(0)
+
+    RT_matrix, mask = cv2.findHomography(tennis_court_model_points[tennis_court_point_idx].astype(np.float32)[:, np.newaxis, :], original_points.astype(np.float32)[:, np.newaxis, :])
+    tennis_court_projected_points = (RT_matrix @ np.r_[tennis_court_model_points.T, np.full((1, tennis_court_model_points.shape[0]), 0.0, dtype=np.float32)]).T
+    img_with_projected_lines = np.copy(image)
+    for line in tennis_court_model_lines:
+        img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+    for model_point in tennis_court_point_idx:
+        img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+    for original_point in original_points:
+        img_with_projected_lines = cv2.circle(img_with_projected_lines, original_point.astype(np.int32), 2, (0, 255, 0), thickness=-1)
+    cv2.imshow('img_with_projected_lines', img_with_projected_lines)
+    cv2.waitKey(0)
+
+    sys.exit(1)
+
+    for i in range(1000):
+        select_points = np.random.choice(points.shape[0], size=(4,), replace=False)
+        points_to_test = points_reshaped[select_points]
         
-        tennis_court_to_test = tennis_court_model_points_reshaped[np.random.choice(tennis_court_model_points_reshaped.shape[0], size=(4,), replace=False)]
+        model_points = np.random.choice(tennis_court_model_points.shape[0], size=(4,), replace=False)
+        tennis_court_to_test = tennis_court_model_points_reshaped[model_points]
         # tennis_court_to_test = tennis_court_model_points_reshaped[[0,3,4,5]]
 
-        RT_matrix = cv2.getPerspectiveTransform(points_to_test, tennis_court_to_test)
-
+        print("homography points:")
+        print(points[select_points].astype(np.float32))
+        print("Tennis court model points:")
+        print(tennis_court_model_points[model_points].astype(np.float32))
+        RT_matrix, mask = cv2.findHomography(points[select_points].astype(np.float32)[:, [1, 0]], tennis_court_model_points[model_points].astype(np.float32))
+        
+        print(RT_matrix)
         # img_wrap = cv2.warpPerspective(image, RT_matrix, (78, 36))
         # print(img_wrap.shape)
         # cv2.imshow('img_wrap', img_wrap)
         # cv2.waitKey(0)
 
 
-        projected_points = (RT_matrix @ points_to_project).T
+        tennis_court_projected_points = (np.linalg.inv(RT_matrix) @ np.r_[tennis_court_model_points.T, np.full((1, tennis_court_model_points.shape[0]), 1, dtype=np.float32)]).T
+        
+        # print(tennis_court_projected_points)
+        
+        img_with_projected_lines = np.copy(image)
+        for line in tennis_court_model_lines:
+            img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+        for model_point in model_points:
+            img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+        for select_point in select_points:
+            img_with_projected_lines = cv2.circle(img_with_projected_lines, points[select_point].astype(np.int32), 2, (0, 255, 0), thickness=-1)
+        cv2.imshow('img_with_projected_lines', img_with_projected_lines)
+        cv2.waitKey(0)
+
+        continue
 
         rtmse = 0.0
         fitting_points = []
@@ -146,6 +229,8 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         cv2.imshow('window', img)
         cv2.waitKey(0)
         """
+
+        
 
         if best_rtmse > rtmse:
             best_rtmse = rtmse
