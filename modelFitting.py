@@ -152,30 +152,32 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     best_rtmse = sys.float_info.max
     best_fitting_points = []
 
-    original_points = np.asarray([[134,361],[662,369],[651,235],[292,235]])
-    tennis_court_point_idx = np.asarray([4,5,7,6])
-
-    print(np.amax(tennis_court_model_points, axis=0).shape)
-    img_with_projected_lines = np.zeros(np.append(np.amax(tennis_court_model_points, axis=0)[[1,0]], [3]))
-    for idx in tennis_court_point_idx:
-       img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_model_points[idx].astype(np.int32), 4, (255, 0, 0), thickness=-1)
-
-    cv2.imshow('model', img_with_projected_lines)
-    cv2.waitKey(0)
-
-    RT_matrix, mask = cv2.findHomography(tennis_court_model_points[tennis_court_point_idx].astype(np.float32)[:, np.newaxis, :], original_points.astype(np.float32)[:, np.newaxis, :])
-    tennis_court_projected_points = (RT_matrix @ np.r_[tennis_court_model_points.T, np.full((1, tennis_court_model_points.shape[0]), 0.0, dtype=np.float32)]).T
-    img_with_projected_lines = np.copy(image)
-    for line in tennis_court_model_lines:
-        img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
-    for model_point in tennis_court_point_idx:
-        img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
-    for original_point in original_points:
-        img_with_projected_lines = cv2.circle(img_with_projected_lines, original_point.astype(np.int32), 2, (0, 255, 0), thickness=-1)
-    cv2.imshow('img_with_projected_lines', img_with_projected_lines)
-    cv2.waitKey(0)
-
-    sys.exit(1)
+    ### VISUAL DEBUG ###
+    # original_points = np.asarray([[134,361],[662,369],[651,235],[292,235]])
+    # tennis_court_point_idx = np.asarray([4,5,7,6])
+    # 
+    # print(np.amax(tennis_court_model_points, axis=0).shape)
+    # img_with_projected_lines = np.zeros(np.append(np.amax(tennis_court_model_points, axis=0)[[1,0]], [3]))
+    # for idx in tennis_court_point_idx:
+    #    img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_model_points[idx].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+    # 
+    # cv2.imshow('model', img_with_projected_lines)
+    # cv2.waitKey(0)
+    # 
+    # RT_matrix, mask = cv2.findHomography(tennis_court_model_points[tennis_court_point_idx].astype(np.float32)[:, np.newaxis, :], original_points.astype(np.float32)[:, np.newaxis, :])
+    # tennis_court_projected_points = RT_matrix @ np.r_[tennis_court_model_points.T, np.full((1, tennis_court_model_points.shape[0]), 1.0, dtype=np.float32)]
+    # tennis_court_projected_points = tennis_court_projected_points / tennis_court_projected_points[2]
+    # tennis_court_projected_points = tennis_court_projected_points.T
+    # img_with_projected_lines = np.copy(image)
+    # for line in tennis_court_model_lines:
+    #     img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+    # for model_point in tennis_court_point_idx:
+    #     img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+    # for original_point in original_points:
+    #     img_with_projected_lines = cv2.circle(img_with_projected_lines, original_point.astype(np.int32), 2, (0, 255, 0), thickness=-1)
+    # cv2.imshow('img_with_projected_lines', img_with_projected_lines)
+    # cv2.waitKey(0)
+    ### END VISUAL DEBUG ###
 
     for i in range(1000):
         select_points = np.random.choice(points.shape[0], size=(4,), replace=False)
@@ -189,8 +191,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         print(points[select_points].astype(np.float32))
         print("Tennis court model points:")
         print(tennis_court_model_points[model_points].astype(np.float32))
-        RT_matrix, mask = cv2.findHomography(points[select_points].astype(np.float32)[:, [1, 0]], tennis_court_model_points[model_points].astype(np.float32))
-        
+        RT_matrix, mask = cv2.findHomography(tennis_court_model_points[model_points].astype(np.float32)[:, np.newaxis, :], points[select_points].astype(np.float32)[:, np.newaxis, :])
         print(RT_matrix)
         # img_wrap = cv2.warpPerspective(image, RT_matrix, (78, 36))
         # print(img_wrap.shape)
@@ -198,7 +199,9 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         # cv2.waitKey(0)
 
 
-        tennis_court_projected_points = (np.linalg.inv(RT_matrix) @ np.r_[tennis_court_model_points.T, np.full((1, tennis_court_model_points.shape[0]), 1, dtype=np.float32)]).T
+        tennis_court_projected_points = RT_matrix @ np.r_[tennis_court_model_points.T, np.full((1, tennis_court_model_points.shape[0]), 1, dtype=np.float32)]
+        tennis_court_projected_points = tennis_court_projected_points / tennis_court_projected_points[2]
+        tennis_court_projected_points = tennis_court_projected_points.T
         
         # print(tennis_court_projected_points)
         
