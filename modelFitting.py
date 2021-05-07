@@ -204,13 +204,14 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         # print(mask)
         # print("RT_matrix:")
         # print(RT_matrix)
+        if np.sum(np.isinf(RT_matrix)) != 0:
+            continue
         if np.sum(mask) != 4:
             continue
         # img_wrap = cv2.warpPerspective(image, RT_matrix, (78, 36))
         # print(img_wrap.shape)
         # cv2.imshow('img_wrap', img_wrap)
         # cv2.waitKey(0)
-
 
         tennis_court_projected_points = RT_matrix @ np.r_[tennis_court_model_points.T, np.full((1, tennis_court_model_points.shape[0]), 1, dtype=np.float32)]
         tennis_court_projected_points = tennis_court_projected_points / tennis_court_projected_points[2]
@@ -240,10 +241,14 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         mask_with_projected_lines = np.zeros(image.shape[:2], np.uint8)
         for line in tennis_court_model_lines:
             mask_with_projected_lines = cv2.line(mask_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
-        masked_image = cv2.bitwise_and(image, image, mask=mask_with_projected_lines)
-        masked_image = cv2.cvtColor(masked_image, cv2.COLOR_BGR2GRAY)
-        masked_image[np.logical_and(masked_image > 0,masked_image < 200)] = -300
-        score = masked_image.sum()
+        colors_to_predict = image[mask_with_projected_lines.astype(bool)]
+        best_gaussian = gm.predict(colors_to_predict)
+        score = np.sum(best_gaussian == line_gaussian)
+        # masked_image = cv2.bitwise_and(image, image, mask=mask_with_projected_lines)
+        # masked_image = cv2.cvtColor(masked_image, cv2.COLOR_BGR2GRAY)
+        # masked_image[np.logical_and(masked_image > 0,masked_image < 200)] = -300
+        # score = masked_image.sum()
+        
         # print(score)
         
         """
