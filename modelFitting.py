@@ -143,7 +143,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     points_to_project = np.r_[points.T, np.full((1, points.shape[0]), 1, dtype=points.dtype)]
 
     best_RT_matrix = None
-    best_score = -1
+    best_score = sys.float_info.max
     best_fitting_points = []
     best_projected_points = None
 
@@ -178,6 +178,10 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     # cv2.imshow('img_wrap', img_wrap)
     # cv2.waitKey(0)
     ### END VISUAL DEBUG ###
+
+    model_image = np.zeros(np.amax(tennis_court_model_points, axis=0)[[1,0]] + 1)
+    for line in tennis_court_model_lines:
+        model_image = cv2.line(model_image, tennis_court_model_points[line[0]], tennis_court_model_points[line[1]], (255), thickness=2)
 
     for i in range(100000):
         select_lines_idx = np.random.choice(lines.shape[0], size=(2,), replace=False)
@@ -219,14 +223,14 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         
         # print(tennis_court_projected_points)
         ### VISUAL DEBUG ###
-        # img_with_projected_lines = np.copy(image)
-        # for line in tennis_court_model_lines:
-        #     img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
-        # for model_point in model_points_idx:
-        #     img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
-        # for select_point in select_points_idx:
-        #     img_with_projected_lines = cv2.circle(img_with_projected_lines, points[select_point].astype(np.int32), 2, (0, 255, 0), thickness=-1)
-        # cv2.imshow('img_with_projected_lines', img_with_projected_lines)
+        img_with_projected_lines = np.copy(image)
+        for line in tennis_court_model_lines:
+            img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+        for model_point in select_model_points:
+            img_with_projected_lines = cv2.circle(img_with_projected_lines, model_point[0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+        for select_point in select_points:
+            img_with_projected_lines = cv2.circle(img_with_projected_lines, select_point.astype(np.int32), 2, (0, 255, 0), thickness=-1)
+        cv2.imshow('img_with_projected_lines', img_with_projected_lines)
         # cv2.waitKey(0)
         ### END DEBUG ###
 
@@ -259,7 +263,28 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         cv2.waitKey(0)
         """
 
-        if best_score < score:
+        if abs(np.linalg.det(RT_matrix)) < sys.float_info.epsilon:
+            continue
+
+        inverse_matrix = np.linalg.inv(RT_matrix)
+
+        tennis_court_reprojected_points = inverse_matrix @ tennis_court_projected_points.T
+        tennis_court_reprojected_points = tennis_court_reprojected_points / tennis_court_reprojected_points[2]
+        tennis_court_reprojected_points = tennis_court_reprojected_points.T
+
+        img_with_projected_lines = np.zeros(np.amax(tennis_court_model_points, axis=0)[[1,0]])
+        for line in tennis_court_model_lines:
+           img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_reprojected_points[line[0]][0:2].astype(np.int32), tennis_court_reprojected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
+
+        cv2.imshow('model', img_with_projected_lines)
+        cv2.waitKey(0)
+
+        img_wrap = cv2.warpPerspective(image, np.linalg.inv(RT_matrix), (model_image.shape[1], model_image.shape[0]))
+        img_wrap_gray = cv2.cvtColor(img_wrap, cv2.COLOR_BGR2GRAY)
+
+        score = np.sum(np.square(img_wrap_gray - model_image))
+
+        if best_score > score:
             best_score = score
             best_RT_matrix = RT_matrix
             best_fitting_points = select_points
