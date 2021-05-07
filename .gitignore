@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # visual studio code
-.vsc
+.vscode
 
 outputs
 hawp
