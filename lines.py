@@ -19,7 +19,7 @@ tennis_court_model_points = np.asarray([
     [72,240],      # 13
 ])
 
-tennis_court_model_lines = [
+tennis_court_model_lines = np.asarray([
     [0, 3],
     [0, 8],
     [1, 9],
@@ -29,4 +29,4 @@ tennis_court_model_lines = [
     [3, 11],
     [2, 10],
     [8, 11],
-]
+])

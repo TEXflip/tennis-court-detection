@@ -179,15 +179,27 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     # cv2.waitKey(0)
     ### END VISUAL DEBUG ###
 
-    for i in range(50000):
-        select_points = np.random.choice(points.shape[0], size=(4,), replace=False) # scegliere in base a linee casuali invece di punti casuali
-        model_points = np.random.choice(tennis_court_model_points.shape[0], size=(4,), replace=False)
+    for i in range(100000):
+        select_lines_idx = np.random.choice(lines.shape[0], size=(2,), replace=False)
+        # select_points_idx = np.random.choice(points.shape[0], size=(4,), replace=False) # scegliere in base a linee casuali invece di punti casuali
+        select_model_lines_idx = np.random.choice(tennis_court_model_lines.shape[0], size=(2,), replace=False)
+        # model_points_idx = np.random.choice(tennis_court_model_points.shape[0], size=(4,), replace=False)
+
+        select_points = np.asarray([np.append(lines[select_lines_idx,0], lines[select_lines_idx,2]),np.append(lines[select_lines_idx,1], lines[select_lines_idx,3])]).T
+        # print("select_points")
+        # print(select_points)
+        # select_points = points[select_points_idx]
+        
+        select_model_points = tennis_court_model_points[np.append(tennis_court_model_lines[select_model_lines_idx,0], tennis_court_model_lines[select_model_lines_idx,1])]
+        # print("select_model_points")
+        # print(select_model_points)
+        # select_model_points = tennis_court_model_points[model_points_idx]
 
         # print("homography points:")
-        # print(points[select_points].astype(np.float32))
+        # print(points[select_points_idx].astype(np.float32))
         # print("Tennis court model points:")
-        # print(tennis_court_model_points[model_points].astype(np.float32))
-        RT_matrix, mask = cv2.findHomography(tennis_court_model_points[model_points].astype(np.float32)[:, np.newaxis, :], points[select_points].astype(np.float32)[:, np.newaxis, :])
+        # print(tennis_court_model_points[model_points_idx].astype(np.float32))
+        RT_matrix, mask = cv2.findHomography(select_model_points.astype(np.float32)[:, np.newaxis, :], select_points.astype(np.float32)[:, np.newaxis, :])
         # print("mask:")
         # print(mask)
         # print("RT_matrix:")
@@ -209,9 +221,9 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         # img_with_projected_lines = np.copy(image)
         # for line in tennis_court_model_lines:
         #     img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
-        # for model_point in model_points:
+        # for model_point in model_points_idx:
         #     img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
-        # for select_point in select_points:
+        # for select_point in select_points_idx:
         #     img_with_projected_lines = cv2.circle(img_with_projected_lines, points[select_point].astype(np.int32), 2, (0, 255, 0), thickness=-1)
         # cv2.imshow('img_with_projected_lines', img_with_projected_lines)
         # cv2.waitKey(0)

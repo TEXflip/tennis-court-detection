@@ -134,3 +134,5 @@ dmypy.json
 outputs
 hawp
 *.pyc
+
+.vscode/settings.json
