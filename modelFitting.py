@@ -82,20 +82,73 @@ def get_lines_from_nn(cfg, impath, image, model, device, threshold):
 
     return lines[idx]
 
+def linesFiltering(lines, angleTh = 5, distTh = 10, minLength = 15):
+    out = []
+    
+    for i, line1 in enumerate(lines):
+        append = True
+        v1 = line1[2:4] - line1[0:2]
+        len1 = np.sqrt(np.sum(v1**2))
+        if len1 < minLength:
+            continue
+
+        for j, line2 in enumerate(lines):
+            if i == j:
+                continue
+            v2 = line2[2:4] - line2[0:2]
+            len2 = np.sqrt(np.sum(v2**2))
+
+            if len2 < minLength:
+                continue
+
+            dot = np.dot(v1 / len1, v2 / len2)
+            dot = max(-1, min(dot, 1))
+            angle = np.arccos(dot) * 180 / np.pi
+
+            angleCondition = np.abs(angle) < angleTh or (angle > 180 - angleTh and angle < 180 + angleTh)
+
+            dist1 = np.sqrt(np.sum((line1[0:2]-line2[0:2])**2)) < distTh
+            dist2 = np.sqrt(np.sum((line1[0:2]-line2[2:4])**2)) < distTh
+            dist3 = np.sqrt(np.sum((line1[2:4]-line2[0:2])**2)) < distTh
+            dist4 = np.sqrt(np.sum((line1[2:4]-line2[2:4])**2)) < distTh
+            distCondition = dist1 or dist2 or dist3 or dist4
+
+            if angleCondition and distCondition and len1 < len2:
+                append = False
+                break
+
+        if append:
+            out.append(line1)
+
+    return np.asarray(out)
+
+def showImgWithLines(image, lines, title='img_with_lines', waitKey=True):
+    img_with_lines = np.copy(image)
+    for line in lines:
+        line = line.astype(np.int32)
+        img_with_lines = cv2.line(img_with_lines, (line[0], line[1]), (line[2], line[3]), (255, 0, 0), 2)
+        img_with_lines = cv2.circle(img_with_lines, (line[0], line[1]), 2, (255, 80, 0), 3)
+        img_with_lines = cv2.circle(img_with_lines, (line[2], line[3]), 2, (255, 80, 0), 3)
+    cv2.imshow(title, img_with_lines)
+    if waitKey:
+        cv2.waitKey(0)
+
 def test_single_image(cfg, impath, model, device, output_path = "", threshold = 0.97):
     image = cv2.imread(impath)
     lines = get_lines_from_nn(cfg, impath, image[:, :, [2, 1, 0]], model, device, threshold)
-    print('number of lines: ', len(lines))
+    nlines = len(lines)
+    print('number of lines: ', nlines)
 
     ### VISUAL DEBUG ###
-    # img_with_lines = np.copy(image)
-    # for line in lines:
-    #     line = line.astype(np.int32)
-    #     img_with_lines = cv2.line(img_with_lines, (line[0], line[1]), (line[2], line[3]), (255, 0, 0), 2)
-    #     img_with_lines = cv2.circle(img_with_lines, (line[0], line[1]), 2, (255, 80, 0), 3)
-    #     img_with_lines = cv2.circle(img_with_lines, (line[2], line[3]), 2, (255, 80, 0), 3)
-    # cv2.imshow('img_with_lines', img_with_lines)
-    # cv2.waitKey(0)
+    # showImgWithLines(image, lines, 'nofilter', False)
+    ### END VISUAL DEBUG ###
+
+
+    lines = linesFiltering(lines)
+    print('lines removed: ', nlines - len(lines), "\t remaining: ", len(lines))
+
+    ### VISUAL DEBUG ###
+    # showImgWithLines(image, lines, "filter", True)
     ### END VISUAL DEBUG ###
 
     mask = np.zeros((image.shape[0], image.shape[1]), dtype=image.dtype)
