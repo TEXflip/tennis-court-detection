@@ -196,7 +196,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     points_to_project = np.r_[points.T, np.full((1, points.shape[0]), 1, dtype=points.dtype)]
 
     best_RT_matrix = None
-    best_score = -1
+    best_score = sys.float_info.max
     best_fitting_points = []
     best_projected_points = None
 
@@ -232,10 +232,14 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     # cv2.waitKey(0)
     ### END VISUAL DEBUG ###
 
+    model_image = np.zeros(np.amax(tennis_court_model_points, axis=0)[[1,0]] + 1)
+    for line in tennis_court_model_lines:
+        model_image = cv2.line(model_image, tennis_court_model_points[line[0]], tennis_court_model_points[line[1]], (255), thickness=2)
+
     for i in range(100000):
-        select_lines_idx = np.random.choice(lines.shape[0], size=(2,), replace=False)
+        select_lines_idx = np.random.choice(lines.shape[0], size=(9,), replace=False)
         # select_points_idx = np.random.choice(points.shape[0], size=(4,), replace=False) # scegliere in base a linee casuali invece di punti casuali
-        select_model_lines_idx = np.random.choice(tennis_court_model_lines.shape[0], size=(2,), replace=False)
+        select_model_lines_idx = np.random.choice(tennis_court_model_lines.shape[0], size=(6,), replace=False)
         # model_points_idx = np.random.choice(tennis_court_model_points.shape[0], size=(4,), replace=False)
 
         select_points = np.asarray([np.append(lines[select_lines_idx,0], lines[select_lines_idx,2]),np.append(lines[select_lines_idx,1], lines[select_lines_idx,3])]).T
@@ -243,7 +247,8 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         # print(select_points)
         # select_points = points[select_points_idx]
         
-        select_model_points = tennis_court_model_points[np.append(tennis_court_model_lines[select_model_lines_idx,0], tennis_court_model_lines[select_model_lines_idx,1])]
+        # select_model_points = tennis_court_model_points[np.append(tennis_court_model_lines[select_model_lines_idx,0], tennis_court_model_lines[select_model_lines_idx,1])]
+        select_model_points = tennis_court_model_points[np.append(tennis_court_model_lines[:,0], tennis_court_model_lines[:,1])]
         # print("select_model_points")
         # print(select_model_points)
         # select_model_points = tennis_court_model_points[model_points_idx]
@@ -257,6 +262,8 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         # print(mask)
         # print("RT_matrix:")
         # print(RT_matrix)
+        if np.sum(np.isinf(RT_matrix)) != 0:
+            continue
         if np.sum(mask) != 4:
             continue
         # img_wrap = cv2.warpPerspective(image, RT_matrix, (78, 36))
@@ -264,21 +271,20 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         # cv2.imshow('img_wrap', img_wrap)
         # cv2.waitKey(0)
 
-
         tennis_court_projected_points = RT_matrix @ np.r_[tennis_court_model_points.T, np.full((1, tennis_court_model_points.shape[0]), 1, dtype=np.float32)]
         tennis_court_projected_points = tennis_court_projected_points / tennis_court_projected_points[2]
         tennis_court_projected_points = tennis_court_projected_points.T
         
         # print(tennis_court_projected_points)
         ### VISUAL DEBUG ###
-        # img_with_projected_lines = np.copy(image)
-        # for line in tennis_court_model_lines:
-        #     img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
-        # for model_point in model_points_idx:
-        #     img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
-        # for select_point in select_points_idx:
-        #     img_with_projected_lines = cv2.circle(img_with_projected_lines, points[select_point].astype(np.int32), 2, (0, 255, 0), thickness=-1)
-        # cv2.imshow('img_with_projected_lines', img_with_projected_lines)
+        img_with_projected_lines = np.copy(image)
+        for line in tennis_court_model_lines:
+            img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+        for model_point in select_model_points:
+            img_with_projected_lines = cv2.circle(img_with_projected_lines, model_point[0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+        for select_point in select_points:
+            img_with_projected_lines = cv2.circle(img_with_projected_lines, select_point.astype(np.int32), 2, (0, 255, 0), thickness=-1)
+        cv2.imshow('img_with_projected_lines', img_with_projected_lines)
         # cv2.waitKey(0)
         ### END DEBUG ###
 
@@ -293,10 +299,14 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         mask_with_projected_lines = np.zeros(image.shape[:2], np.uint8)
         for line in tennis_court_model_lines:
             mask_with_projected_lines = cv2.line(mask_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
-        masked_image = cv2.bitwise_and(image, image, mask=mask_with_projected_lines)
-        masked_image = cv2.cvtColor(masked_image, cv2.COLOR_BGR2GRAY)
-        masked_image[np.logical_and(masked_image > 0,masked_image < 200)] = -300
-        score = masked_image.sum()
+        colors_to_predict = image[mask_with_projected_lines.astype(bool)]
+        best_gaussian = gm.predict(colors_to_predict)
+        score = np.sum(best_gaussian == line_gaussian)
+        # masked_image = cv2.bitwise_and(image, image, mask=mask_with_projected_lines)
+        # masked_image = cv2.cvtColor(masked_image, cv2.COLOR_BGR2GRAY)
+        # masked_image[np.logical_and(masked_image > 0,masked_image < 200)] = -300
+        # score = masked_image.sum()
+        
         # print(score)
         
         """
@@ -307,7 +317,36 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         cv2.waitKey(0)
         """
 
-        if best_score < score:
+        if abs(np.linalg.det(RT_matrix)) < sys.float_info.epsilon:
+            continue
+
+        inverse_matrix = np.linalg.inv(RT_matrix)
+
+        tennis_court_reprojected_points = inverse_matrix @ tennis_court_projected_points.T
+        tennis_court_reprojected_points = tennis_court_reprojected_points / tennis_court_reprojected_points[2]
+        tennis_court_reprojected_points = tennis_court_reprojected_points.T
+
+        ### VISUAL DEBUG ###
+        print("RT_matrix:")
+        print(RT_matrix)
+        img_with_projected_lines = np.zeros(np.amax(tennis_court_model_points, axis=0)[[1,0]])
+        for line in tennis_court_model_lines:
+           img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_reprojected_points[line[0]][0:2].astype(np.int32), tennis_court_reprojected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
+        cv2.imshow('model', img_with_projected_lines)
+        # cv2.waitKey(0)
+        ### END VISUAL DEBUG ###
+
+        img_wrap = cv2.warpPerspective(image, np.linalg.inv(RT_matrix), (model_image.shape[1], model_image.shape[0]))
+        img_wrap_gray = cv2.cvtColor(img_wrap, cv2.COLOR_BGR2GRAY)
+
+        ### VISUAL DEBUG ###
+        cv2.imshow('img_wrap_gray', img_wrap_gray)
+        cv2.waitKey(0)
+        ### END VISUAL DEBUG ###
+
+        score = np.sum(np.square(img_wrap_gray - model_image))
+
+        if best_score > score:
             best_score = score
             best_RT_matrix = RT_matrix
             best_fitting_points = select_points
