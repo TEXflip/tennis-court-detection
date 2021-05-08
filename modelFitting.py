@@ -122,8 +122,23 @@ def linesFiltering(lines, angleTh = 5, distTh = 10, minLength = 15):
 
     return np.asarray(out)
 
-def linesFilteringWithMask(lines, candidate_lines_mask):
-    return 0 # TODO
+def linesFilteringWithMask(lines, candidate_lines_mask, ratio=0.50):
+    black = np.zeros(candidate_lines_mask.shape[:2], dtype=np.uint8)
+    out = []
+    for line in lines:
+        vec = line[2:4] - line[0:2]
+        lenLine = np.sqrt(np.sum(vec**2))
+        lineInt = line.astype(np.uint32)
+        mask1 = cv2.line(black.copy(), (lineInt[0], lineInt[1]), (lineInt[2], lineInt[3]), (255), 3)
+        mask1 = np.where(mask1 == 255, True, False)
+        mask2 = candidate_lines_mask
+        line_mask = np.logical_and(mask1, mask2)
+        line_mask = np.where(line_mask, 1, 0).astype(np.uint8)
+        # cv2.imshow('line', line_mask)
+        # cv2.waitKey(0)
+        if line_mask.sum() > lenLine * ratio:
+            out.append(line)
+    return np.asarray(out)
 
 
 def showImgWithLines(image, lines, title='img_with_lines', waitKey=True):
@@ -139,6 +154,7 @@ def showImgWithLines(image, lines, title='img_with_lines', waitKey=True):
 
 def test_single_image(cfg, impath, model, device, output_path = "", threshold = 0.97):
     image = cv2.imread(impath)
+    print("image resolution: ", image.shape)
     lines = get_lines_from_nn(cfg, impath, image[:, :, [2, 1, 0]], model, device, threshold)
     nLines = len(lines)
     print('number of lines: ', nLines)
@@ -157,7 +173,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     mask = np.zeros((image.shape[0], image.shape[1]), dtype=image.dtype)
     for line in lines:
         line = line.astype(np.int32)
-        mask = cv2.line(mask, (line[0], line[1]), (line[2], line[3]), 255, 5)
+        mask = cv2.line(mask, (line[0], line[1]), (line[2], line[3]), 255, 6)
     
     ### VISUAL DEBUG ###
     # cv2.imshow('mask', mask)
@@ -176,8 +192,13 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
 
     candidate_lines_mask = np.logical_and(mask, np.reshape(fitted_gaussian == line_gaussian, (image.shape[0], image.shape[1])))
     candidate_lines = np.where(candidate_lines_mask, 255, 0).astype(np.uint8)
+    cv2.imshow('gaussina mixture', candidate_lines)
+    cv2.waitKey(0)
 
-    linesFilteringWithMask(lines, candidate_lines_mask)
+    nLines = len(lines)
+    lines = linesFilteringWithMask(lines, candidate_lines_mask)
+    print('removed lines: ', nLines-len(lines), "\t remaining: ",len(lines))
+    showImgWithLines(image, lines, 'filter with mask')
 
     points = np.asarray([np.append(lines[:,0], lines[:,2]),np.append(lines[:,1], lines[:,3])]).T
 
