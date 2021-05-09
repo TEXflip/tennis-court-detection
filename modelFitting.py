@@ -140,6 +140,50 @@ def linesFilteringWithMask(lines, candidate_lines_mask, ratio=0.50):
             out.append(line)
     return np.asarray(out)
 
+def computeLineScore(projectedLines, lines, angleTh = 10):
+    score = 0
+    for pLine in projectedLines:
+        minDist = 10e9
+        for line in lines:
+            v1 = pLine[2:4] - pLine[0:2]
+            v2 = line[2:4] - line[0:2]
+            len1 = np.sqrt(np.sum(v1**2))
+            len2 = np.sqrt(np.sum(v2**2))
+            dot = np.dot(v1 / len1, v2 / len2)
+            dot = max(-1, min(dot, 1))
+            angle = np.arccos(dot) * 180 / np.pi
+            if np.abs(angle) < angleTh or (angle > 180 - angleTh and angle < 180 + angleTh):
+                dist1 = np.sum((pLine[0:2] - line[0:2])**2)
+                dist2 = np.sum((pLine[0:2] - line[2:4])**2)
+                dist3 = np.sum((pLine[2:4] - line[0:2])**2)
+                dist4 = np.sum((pLine[2:4] - line[2:4])**2)
+                totDistance = min(dist1, dist2) + min(dist3, dist4)
+                if minDist > totDistance:
+                    minDist = totDistance
+                # if minDist < 100:
+                #     break
+        score += 100-minDist
+    return score
+
+def orderLines(lines):
+    # longer lines first
+    dist = []
+    for line in lines:
+        vec = line[2:4] - line[0:2]
+        dist.append(np.sum(vec**2))
+    dist = np.asarray(dist)
+    dist = dist.argsort()
+    return lines[dist]
+
+def selectInOrderGenerator(size):
+    out = [0,0]
+    yield np.asarray(out)
+    while out[0] != size - 2 or out[1] != size -1:
+        out[1] += 1
+        if out[1] == size:
+            out[0] += 1
+            out[1] = out[0]+1
+        yield np.array(out)
 
 def showImgWithLines(image, lines, title='img_with_lines', waitKey=True):
     img_with_lines = np.copy(image)
@@ -165,6 +209,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
 
     lines = linesFiltering(lines)
     print('removed lines: ', nLines-len(lines), "\t remaining: ",len(lines))
+    lines = orderLines(lines)
 
     ### VISUAL DEBUG ###
     # showImgWithLines(image, lines, 'filtered')
@@ -192,13 +237,13 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
 
     candidate_lines_mask = np.logical_and(mask, np.reshape(fitted_gaussian == line_gaussian, (image.shape[0], image.shape[1])))
     candidate_lines = np.where(candidate_lines_mask, 255, 0).astype(np.uint8)
-    cv2.imshow('gaussina mixture', candidate_lines)
-    cv2.waitKey(0)
+    # cv2.imshow('gaussina mixture', candidate_lines)
+    # cv2.waitKey(0)
 
     nLines = len(lines)
     lines = linesFilteringWithMask(lines, candidate_lines_mask)
     print('removed lines: ', nLines-len(lines), "\t remaining: ",len(lines))
-    showImgWithLines(image, lines, 'filter with mask')
+    # showImgWithLines(image, lines, 'filter with mask')
 
     points = np.asarray([np.append(lines[:,0], lines[:,2]),np.append(lines[:,1], lines[:,3])]).T
 
@@ -260,19 +305,33 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     # cv2.imshow('img_wrap', img_wrap)
     # cv2.waitKey(0)
     ### END VISUAL DEBUG ###
+    lineGenerator = selectInOrderGenerator(lines.shape[0])
+    modelLineGenerator = selectInOrderGenerator(tennis_court_model_lines.shape[0])
 
-    for i in range(100000):
+    for i in range(5000):
         select_lines_idx = np.random.choice(lines.shape[0], size=(2,), replace=False)
-        # select_points_idx = np.random.choice(points.shape[0], size=(4,), replace=False) # scegliere in base a linee casuali invece di punti casuali
         select_model_lines_idx = np.random.choice(tennis_court_model_lines.shape[0], size=(2,), replace=False)
-        # model_points_idx = np.random.choice(tennis_court_model_points.shape[0], size=(4,), replace=False)
+
+        if  i == 0:
+            select_model_lines_idx = next(modelLineGenerator)
+
+        try:
+            select_lines_idx = next(lineGenerator)
+        except StopIteration:
+            lineGenerator = selectInOrderGenerator(lines.shape[0])
+            select_lines_idx = next(lineGenerator)
+        if not len(select_lines_idx) > 0:
+            select_model_lines_idx = next(modelLineGenerator)
 
         select_points = np.asarray([np.append(lines[select_lines_idx,0], lines[select_lines_idx,2]),np.append(lines[select_lines_idx,1], lines[select_lines_idx,3])]).T
+        # select_points = np.asarray([[133,361],[662,369],[652,235],[292,234]])
         # print("select_points")
         # print(select_points)
         # select_points = points[select_points_idx]
         
         select_model_points = tennis_court_model_points[np.append(tennis_court_model_lines[select_model_lines_idx,0], tennis_court_model_lines[select_model_lines_idx,1])]
+        # select_model_points = tennis_court_model_points[[4,5,7,6]]
+        
         # print("select_model_points")
         # print(select_model_points)
         # select_model_points = tennis_court_model_points[model_points_idx]
@@ -286,7 +345,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         # print(mask)
         # print("RT_matrix:")
         # print(RT_matrix)
-        if np.sum(np.isinf(RT_matrix)) != 0:
+        if RT_matrix is None or np.sum(np.isinf(RT_matrix)) != 0:
             continue
         if np.sum(mask) != 4:
             continue
@@ -303,15 +362,15 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         
         # print(tennis_court_projected_points)
         ### VISUAL DEBUG ###
-        # img_with_projected_lines = np.copy(image)
-        # for line in tennis_court_model_lines:
-        #     img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+        img_with_projected_lines = np.copy(image)
+        for line in tennis_court_model_lines:
+            img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
         # for model_point in model_points_idx:
         #     img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
         # for select_point in select_points_idx:
         #     img_with_projected_lines = cv2.circle(img_with_projected_lines, points[select_point].astype(np.int32), 2, (0, 255, 0), thickness=-1)
-        # cv2.imshow('img_with_projected_lines', img_with_projected_lines)
-        # cv2.waitKey(0)
+        cv2.imshow('img_with_projected_lines', img_with_projected_lines)
+        cv2.waitKey(1)
         ### END DEBUG ###
 
         # rtmse = 0.0
@@ -322,16 +381,22 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         #     fitting_points.append(min_point)
         #     rtmse += distances[min_point]
 
-        mask_with_projected_lines = np.zeros(image.shape[:2], np.uint8)
-        for line in tennis_court_model_lines:
-            mask_with_projected_lines = cv2.line(mask_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
-        colors_to_predict = image[mask_with_projected_lines.astype(bool)]
-        best_gaussian = gm.predict(colors_to_predict)
-        score = np.sum(best_gaussian == line_gaussian)
+        # mask_with_projected_lines = np.zeros(image.shape[:2], np.uint8)
+        # for line in tennis_court_model_lines:
+        #     mask_with_projected_lines = cv2.line(mask_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
+        # colors_to_predict = image[mask_with_projected_lines.astype(bool)]
+        # best_gaussian = gm.predict(colors_to_predict)
+        # score = np.sum(best_gaussian == line_gaussian)
         # masked_image = cv2.bitwise_and(image, image, mask=mask_with_projected_lines)
         # masked_image = cv2.cvtColor(masked_image, cv2.COLOR_BGR2GRAY)
         # masked_image[np.logical_and(masked_image > 0,masked_image < 200)] = -300
         # score = masked_image.sum()
+
+        projected_lines = []
+        for line in tennis_court_model_lines:
+            projected_lines.append(np.append(tennis_court_projected_points[line[0]][0:2], tennis_court_projected_points[line[1]][0:2]))
+        projected_lines  = np.asarray(projected_lines)
+        score = computeLineScore(projected_lines, lines)
         
         # print(score)
         
@@ -348,10 +413,13 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
             best_RT_matrix = RT_matrix
             best_fitting_points = select_points
             best_projected_points = tennis_court_projected_points
+            img_with_projected_lines = np.copy(image)
+
+        print("\rfitting attempts: ",i," \tcurr better score: ", best_score, end='')
     
     best_fitting_points = np.asarray(best_fitting_points)
 
-    print("best_score:", best_score)
+    print("\nbest_score:", best_score)
     img_with_projected_lines = np.copy(image)
     for line in tennis_court_model_lines:
         img_with_projected_lines = cv2.line(img_with_projected_lines, best_projected_points[line[0]][0:2].astype(np.int32), best_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
