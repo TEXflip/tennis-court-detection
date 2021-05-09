@@ -82,23 +82,23 @@ def get_lines_from_nn(cfg, impath, image, model, device, threshold):
 
     return lines[idx]
 
-def linesFiltering(lines, angleTh = 5, distTh = 10, minLength = 15):
+def linesFiltering(lines, imgRes, angleTh = 5, distTh = 10, minLength = 0.1):
     out = []
-    
+    minRes = min(imgRes)
     for i, line1 in enumerate(lines):
         append = True
         v1 = line1[2:4] - line1[0:2]
-        len1 = np.sqrt(np.sum(v1**2))
-        if len1 < minLength:
+        len1 = np.linalg.norm(v1)
+        if len1 < minRes*minLength:
             continue
 
         for j, line2 in enumerate(lines):
             if i == j:
                 continue
             v2 = line2[2:4] - line2[0:2]
-            len2 = np.sqrt(np.sum(v2**2))
+            len2 = np.linalg.norm(v2)
 
-            if len2 < minLength:
+            if len2 < minRes*minLength:
                 continue
 
             dot = np.dot(v1 / len1, v2 / len2)
@@ -107,10 +107,10 @@ def linesFiltering(lines, angleTh = 5, distTh = 10, minLength = 15):
 
             angleCondition = np.abs(angle) < angleTh or (angle > 180 - angleTh and angle < 180 + angleTh)
 
-            dist1 = np.sqrt(np.sum((line1[0:2]-line2[0:2])**2)) < distTh
-            dist2 = np.sqrt(np.sum((line1[0:2]-line2[2:4])**2)) < distTh
-            dist3 = np.sqrt(np.sum((line1[2:4]-line2[0:2])**2)) < distTh
-            dist4 = np.sqrt(np.sum((line1[2:4]-line2[2:4])**2)) < distTh
+            dist1 = np.linalg.norm(line1[0:2]-line2[0:2]) < distTh
+            dist2 = np.linalg.norm(line1[0:2]-line2[2:4]) < distTh
+            dist3 = np.linalg.norm(line1[2:4]-line2[0:2]) < distTh
+            dist4 = np.linalg.norm(line1[2:4]-line2[2:4]) < distTh
             distCondition = dist1 or dist2 or dist3 or dist4
 
             if angleCondition and distCondition and len1 < len2:
@@ -140,15 +140,17 @@ def linesFilteringWithMask(lines, candidate_lines_mask, ratio=0.50):
             out.append(line)
     return np.asarray(out)
 
-def computeLineScore(projectedLines, lines, angleTh = 10):
+def computeLineScore(projectedLines, lines, angleTh = 4):
     score = 0
     for pLine in projectedLines:
         minDist = 10e9
-        for line in lines:
+        mini = -1
+        localScore = 0
+        for i, line in enumerate(lines):
             v1 = pLine[2:4] - pLine[0:2]
             v2 = line[2:4] - line[0:2]
-            len1 = np.sqrt(np.sum(v1**2))
-            len2 = np.sqrt(np.sum(v2**2))
+            len1 = np.linalg.norm(v1)
+            len2 = np.linalg.norm(v2)
             dot = np.dot(v1 / len1, v2 / len2)
             dot = max(-1, min(dot, 1))
             angle = np.arccos(dot) * 180 / np.pi
@@ -157,11 +159,13 @@ def computeLineScore(projectedLines, lines, angleTh = 10):
                 dist2 = np.sum((pLine[0:2] - line[2:4])**2)
                 dist3 = np.sum((pLine[2:4] - line[0:2])**2)
                 dist4 = np.sum((pLine[2:4] - line[2:4])**2)
+                # totDistance = min((dist1, dist2, dist3, dist4))
                 totDistance = min(dist1, dist2) + min(dist3, dist4)
                 if minDist > totDistance:
                     minDist = totDistance
-                # if minDist < 100:
-                #     break
+                    mini = i
+        if mini != -1:
+            lines = np.delete(lines, mini, axis=0)
         score += 100-minDist
     return score
 
@@ -193,8 +197,7 @@ def showImgWithLines(image, lines, title='img_with_lines', waitKey=True):
         img_with_lines = cv2.circle(img_with_lines, (line[0], line[1]), 2, (255, 80, 0), 3)
         img_with_lines = cv2.circle(img_with_lines, (line[2], line[3]), 2, (255, 80, 0), 3)
     cv2.imshow(title, img_with_lines)
-    if waitKey:
-        cv2.waitKey(0)
+    cv2.waitKey(0 if waitKey else 1)
 
 def test_single_image(cfg, impath, model, device, output_path = "", threshold = 0.97):
     image = cv2.imread(impath)
@@ -207,7 +210,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     # showImgWithLines(image, lines, 'noFilter', False)
     ### END VISUAL DEBUG ###
 
-    lines = linesFiltering(lines)
+    lines = linesFiltering(lines, image.shape[:2])
     print('removed lines: ', nLines-len(lines), "\t remaining: ",len(lines))
     lines = orderLines(lines)
 
@@ -243,7 +246,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     nLines = len(lines)
     lines = linesFilteringWithMask(lines, candidate_lines_mask)
     print('removed lines: ', nLines-len(lines), "\t remaining: ",len(lines))
-    # showImgWithLines(image, lines, 'filter with mask')
+    showImgWithLines(image, lines, 'filter with mask', False)
 
     points = np.asarray([np.append(lines[:,0], lines[:,2]),np.append(lines[:,1], lines[:,3])]).T
 
@@ -270,7 +273,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     points_to_project = np.r_[points.T, np.full((1, points.shape[0]), 1, dtype=points.dtype)]
 
     best_RT_matrix = None
-    best_score = -1
+    best_score = float('-inf')
     best_fitting_points = []
     best_projected_points = None
 
@@ -308,20 +311,21 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     lineGenerator = selectInOrderGenerator(lines.shape[0])
     modelLineGenerator = selectInOrderGenerator(tennis_court_model_lines.shape[0])
 
-    for i in range(5000):
-        select_lines_idx = np.random.choice(lines.shape[0], size=(2,), replace=False)
-        select_model_lines_idx = np.random.choice(tennis_court_model_lines.shape[0], size=(2,), replace=False)
+    for i in range(5001):
+        # select_lines_idx = np.random.choice(lines.shape[0], size=(2,), replace=False)
+        # select_model_lines_idx = np.random.choice(tennis_court_model_lines.shape[0], size=(2,), replace=False)
 
         if  i == 0:
             select_model_lines_idx = next(modelLineGenerator)
-
         try:
             select_lines_idx = next(lineGenerator)
         except StopIteration:
             lineGenerator = selectInOrderGenerator(lines.shape[0])
             select_lines_idx = next(lineGenerator)
-        if not len(select_lines_idx) > 0:
-            select_model_lines_idx = next(modelLineGenerator)
+            try:
+                select_model_lines_idx = next(modelLineGenerator)
+            except StopIteration:
+                break
 
         select_points = np.asarray([np.append(lines[select_lines_idx,0], lines[select_lines_idx,2]),np.append(lines[select_lines_idx,1], lines[select_lines_idx,3])]).T
         # select_points = np.asarray([[133,361],[662,369],[652,235],[292,234]])
@@ -369,8 +373,8 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         #     img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
         # for select_point in select_points_idx:
         #     img_with_projected_lines = cv2.circle(img_with_projected_lines, points[select_point].astype(np.int32), 2, (0, 255, 0), thickness=-1)
-        cv2.imshow('img_with_projected_lines', img_with_projected_lines)
-        cv2.waitKey(1)
+        # cv2.imshow('img_with_projected_lines', img_with_projected_lines)
+        # cv2.waitKey(1)
         ### END DEBUG ###
 
         # rtmse = 0.0
@@ -397,9 +401,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
             projected_lines.append(np.append(tennis_court_projected_points[line[0]][0:2], tennis_court_projected_points[line[1]][0:2]))
         projected_lines  = np.asarray(projected_lines)
         score = computeLineScore(projected_lines, lines)
-        
-        # print(score)
-        
+                
         """
         img = np.copy(image)
         for point in fitting_points:
@@ -407,6 +409,10 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         cv2.imshow('window', img)
         cv2.waitKey(0)
         """
+        # if score > 0:
+        #     print(score)
+        #     cv2.imshow('img_with_projected_lines', img_with_projected_lines)
+        #     cv2.waitKey(0)
 
         if best_score < score:
             best_score = score
@@ -414,8 +420,11 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
             best_fitting_points = select_points
             best_projected_points = tennis_court_projected_points
             img_with_projected_lines = np.copy(image)
+            if score > 100:
+                break
 
-        print("\rfitting attempts: ",i," \tcurr better score: ", best_score, end='')
+        if i% 50 == 0:
+            print("\rfitting attempts: ",i,"  best score: ", best_score, end='')
     
     best_fitting_points = np.asarray(best_fitting_points)
 
