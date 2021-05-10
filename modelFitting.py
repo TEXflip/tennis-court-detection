@@ -84,6 +84,12 @@ def get_lines_from_nn(cfg, impath, image, model, device, threshold):
 
     return lines[idx]
 
+def pointLineMinDist(line, point): # (a.x,a.y,b.x,b.y), (p.x,p.y)
+    ap = point - line[0:2]
+    ab = line[2:4] - line[0:2]
+    perpendicular_intersection = line[0:2] + max(0, min(1, np.dot(ap, ab)/(ab**2).sum())) * ab
+    return np.linalg.norm(perpendicular_intersection - point)
+
 def linesFiltering(lines, imgRes, angleTh = 5, distTh = 10, minLength = 0.1):
     out = []
     minRes = min(imgRes)
@@ -114,6 +120,11 @@ def linesFiltering(lines, imgRes, angleTh = 5, distTh = 10, minLength = 0.1):
             dist3 = np.linalg.norm(line1[2:4]-line2[0:2]) < distTh
             dist4 = np.linalg.norm(line1[2:4]-line2[2:4]) < distTh
             distCondition = dist1 or dist2 or dist3 or dist4
+            # dist1 = pointLineMinDist(line1, line2[0:2])
+            # dist2 = pointLineMinDist(line1, line2[2:4])
+            # dist3 = pointLineMinDist(line2, line1[0:2])
+            # dist4 = pointLineMinDist(line2, line1[2:4])
+            # distCondition = min((dist1, dist2, dist3, dist4)) < distTh
 
             if angleCondition and distCondition and len1 < len2:
                 append = False
@@ -145,7 +156,7 @@ def linesFilteringWithMask(lines, candidate_lines_mask, ratio=0.50):
 def linesFilteringWithGraph(lines, min_components = 3):
     G = nx.Graph()
     for i, line1 in enumerate(lines):
-        shLine1 = LineString([line1[0:2],line1[2:4]])
+        shLine1 = LineString([line1[0:2],line1[2:4]]) # TODO extend the lines a bit
         for j, line2 in enumerate(lines[(i+1):]):
             shLine2 = LineString([line2[0:2],line2[2:4]])
             if shLine1.intersects(shLine2):
@@ -181,8 +192,12 @@ def computeLineScore(projectedLines, lines, angleTh = 4):
                 dist2 = np.sum((pLine[0:2] - line[2:4])**2)
                 dist3 = np.sum((pLine[2:4] - line[0:2])**2)
                 dist4 = np.sum((pLine[2:4] - line[2:4])**2)
-                # totDistance = min((dist1, dist2, dist3, dist4))
                 totDistance = min(dist1, dist2) + min(dist3, dist4)
+                # dist1 = pointLineMinDist(pLine, line[0:2])
+                # dist2 = pointLineMinDist(pLine, line[2:4])
+                # dist3 = pointLineMinDist(line, pLine[0:2])
+                # dist4 = pointLineMinDist(line, pLine[2:4])
+                # totDistance = min((dist1, dist2, dist3, dist4)) 
                 if minDist > totDistance:
                     minDist = totDistance
                     mini = i
