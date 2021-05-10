@@ -23,6 +23,8 @@ import numpy as np
 import cv2
 import sys
 import random
+import networkx as nx
+from shapely.geometry import LineString
 
 from lines import tennis_court_model_points, tennis_court_model_lines
 
@@ -140,12 +142,32 @@ def linesFilteringWithMask(lines, candidate_lines_mask, ratio=0.50):
             out.append(line)
     return np.asarray(out)
 
+def linesFilteringWithGraph(lines, min_components = 3):
+    G = nx.Graph()
+    for i, line1 in enumerate(lines):
+        shLine1 = LineString([line1[0:2],line1[2:4]])
+        for j, line2 in enumerate(lines[(i+1):]):
+            shLine2 = LineString([line2[0:2],line2[2:4]])
+            if shLine1.intersects(shLine2):
+                # p = shLine1.intersection(shLine2)
+                G.add_edge(i, i+j+1)
+            elif not G.has_node(i):
+                G.add_node(i)
+            elif not G.has_node(i+j+1):
+                G.add_node(i+j+1)
+    out = np.array([]).reshape(0,4)
+    components = nx.algorithms.components.connected_components(G)
+    for comp in components:
+        if len(comp) >= min_components:
+            indices = np.asarray(list(comp))
+            out = np.concatenate((out, lines[indices]), axis=0)
+    return out
+
 def computeLineScore(projectedLines, lines, angleTh = 4):
     score = 0
     for pLine in projectedLines:
-        minDist = 10e9
+        minDist = 1e6
         mini = -1
-        localScore = 0
         for i, line in enumerate(lines):
             v1 = pLine[2:4] - pLine[0:2]
             v2 = line[2:4] - line[0:2]
@@ -166,7 +188,7 @@ def computeLineScore(projectedLines, lines, angleTh = 4):
                     mini = i
         if mini != -1:
             lines = np.delete(lines, mini, axis=0)
-        score += 100-minDist
+        score += 1e3 - minDist
     return score
 
 def orderLines(lines):
@@ -196,6 +218,10 @@ def showImgWithLines(image, lines, title='img_with_lines', waitKey=True):
         img_with_lines = cv2.line(img_with_lines, (line[0], line[1]), (line[2], line[3]), (255, 0, 0), 2)
         img_with_lines = cv2.circle(img_with_lines, (line[0], line[1]), 2, (255, 80, 0), 3)
         img_with_lines = cv2.circle(img_with_lines, (line[2], line[3]), 2, (255, 80, 0), 3)
+    aspect_ratio = image.shape[1]/image.shape[0]
+    res = max(image.shape[:2])
+    res = res if res < 400 else 400
+    img_with_lines = cv2.resize(img_with_lines, (int(res * aspect_ratio), res))
     cv2.imshow(title, img_with_lines)
     cv2.waitKey(0 if waitKey else 1)
 
@@ -207,9 +233,10 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     print('number of lines: ', nLines)
 
     ### VISUAL DEBUG ###
-    # showImgWithLines(image, lines, 'noFilter', False)
+    showImgWithLines(image, lines, 'before Filter', False)
     ### END VISUAL DEBUG ###
 
+    print('removing lines too close...')
     lines = linesFiltering(lines, image.shape[:2])
     print('removed lines: ', nLines-len(lines), "\t remaining: ",len(lines))
     lines = orderLines(lines)
@@ -244,9 +271,16 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     # cv2.waitKey(0)
 
     nLines = len(lines)
+    print('removing non-white lines...')
     lines = linesFilteringWithMask(lines, candidate_lines_mask)
     print('removed lines: ', nLines-len(lines), "\t remaining: ",len(lines))
-    showImgWithLines(image, lines, 'filter with mask', False)
+
+    nLines = len(lines)
+    print('removing lonely lines...')
+    lines = linesFilteringWithGraph(lines)
+    print('removed lines: ', nLines-len(lines), "\t remaining: ",len(lines))
+
+    showImgWithLines(image, lines, 'after all filters', False)
 
     points = np.asarray([np.append(lines[:,0], lines[:,2]),np.append(lines[:,1], lines[:,3])]).T
 
@@ -420,7 +454,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
             best_fitting_points = select_points
             best_projected_points = tennis_court_projected_points
             img_with_projected_lines = np.copy(image)
-            if score > 100:
+            if best_score > 100:
                 break
 
         if i% 50 == 0:
@@ -432,6 +466,10 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     img_with_projected_lines = np.copy(image)
     for line in tennis_court_model_lines:
         img_with_projected_lines = cv2.line(img_with_projected_lines, best_projected_points[line[0]][0:2].astype(np.int32), best_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+    aspect_ratio = image.shape[1]/image.shape[0]
+    res = max(image.shape[:2])
+    res = res if res < 700 else 700
+    img_with_projected_lines = cv2.resize(img_with_projected_lines, (int(res * aspect_ratio), res))
     cv2.imshow('window', img_with_projected_lines)
     cv2.waitKey(0)
     
