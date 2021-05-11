@@ -97,7 +97,7 @@ def linesFiltering(lines, imgRes, angleTh = 5, distTh = 10, minLength = 0.1):
         append = True
         v1 = line1[2:4] - line1[0:2]
         len1 = np.linalg.norm(v1)
-        if len1 < minRes*minLength:
+        if len1 < minRes * minLength:
             continue
 
         for j, line2 in enumerate(lines):
@@ -106,7 +106,7 @@ def linesFiltering(lines, imgRes, angleTh = 5, distTh = 10, minLength = 0.1):
             v2 = line2[2:4] - line2[0:2]
             len2 = np.linalg.norm(v2)
 
-            if len2 < minRes*minLength:
+            if len2 < minRes * minLength:
                 continue
 
             dot = np.dot(v1 / len1, v2 / len2)
@@ -153,12 +153,19 @@ def linesFilteringWithMask(lines, candidate_lines_mask, ratio=0.50):
             out.append(line)
     return np.asarray(out)
 
-def linesFilteringWithGraph(lines, min_components = 3):
+def linesFilteringWithGraph(lines, min_components = 3, lineExtension = 2, hardCut = True):
+    def extendLine(line, extension): # (a.x,a.y,b.x,b.y)
+        ab = line[2:4] - line[0:2]
+        v = (ab / np.linalg.norm(ab)) * extension
+        return [line[0:2] - v, line[2:4] + v]
+    
     G = nx.Graph()
     for i, line1 in enumerate(lines):
-        shLine1 = LineString([line1[0:2],line1[2:4]]) # TODO extend the lines a bit
+        shLine1 = extendLine(line1, lineExtension)
+        shLine1 = LineString(shLine1)
         for j, line2 in enumerate(lines[(i+1):]):
-            shLine2 = LineString([line2[0:2],line2[2:4]])
+            shLine2 = extendLine(line2, lineExtension)
+            shLine2 = LineString(shLine2)
             if shLine1.intersects(shLine2):
                 # p = shLine1.intersection(shLine2)
                 G.add_edge(i, i+j+1)
@@ -167,8 +174,12 @@ def linesFilteringWithGraph(lines, min_components = 3):
             elif not G.has_node(i+j+1):
                 G.add_node(i+j+1)
     out = np.array([]).reshape(0,4)
-    components = nx.algorithms.components.connected_components(G)
-    for comp in components:
+    comps = nx.algorithms.components.connected_components(G)
+    if hardCut:
+        comps = np.array(list(comps))
+        sorted = np.array([len(x) for x in comps]).argsort()[::-1]
+        comps = comps[sorted][:2]
+    for comp in comps:
         if len(comp) >= min_components:
             indices = np.asarray(list(comp))
             out = np.concatenate((out, lines[indices]), axis=0)
@@ -177,33 +188,37 @@ def linesFilteringWithGraph(lines, min_components = 3):
 def computeLineScore(projectedLines, lines, angleTh = 4):
     score = 0
     for pLine in projectedLines:
-        minDist = 1e6
+        v1 = pLine[2:4] - pLine[0:2]
+        len1 = np.linalg.norm(v1)
+        minScore = 1e5
         mini = -1
         for i, line in enumerate(lines):
-            v1 = pLine[2:4] - pLine[0:2]
+            localScore = 0
             v2 = line[2:4] - line[0:2]
-            len1 = np.linalg.norm(v1)
             len2 = np.linalg.norm(v2)
-            dot = np.dot(v1 / len1, v2 / len2)
-            dot = max(-1, min(dot, 1))
+            dot = abs(np.dot(v1 / len1, v2 / len2))
+            dot = min(1, dot)
             angle = np.arccos(dot) * 180 / np.pi
-            if np.abs(angle) < angleTh or (angle > 180 - angleTh and angle < 180 + angleTh):
-                dist1 = np.sum((pLine[0:2] - line[0:2])**2)
-                dist2 = np.sum((pLine[0:2] - line[2:4])**2)
-                dist3 = np.sum((pLine[2:4] - line[0:2])**2)
-                dist4 = np.sum((pLine[2:4] - line[2:4])**2)
-                totDistance = min(dist1, dist2) + min(dist3, dist4)
-                # dist1 = pointLineMinDist(pLine, line[0:2])
-                # dist2 = pointLineMinDist(pLine, line[2:4])
-                # dist3 = pointLineMinDist(line, pLine[0:2])
-                # dist4 = pointLineMinDist(line, pLine[2:4])
-                # totDistance = min((dist1, dist2, dist3, dist4)) 
-                if minDist > totDistance:
-                    minDist = totDistance
-                    mini = i
+            if angle < angleTh:
+                dist1 = pointLineMinDist(pLine, line[0:2])
+                dist2 = pointLineMinDist(pLine, line[2:4])
+                dist3 = pointLineMinDist(line, pLine[0:2])
+                dist4 = pointLineMinDist(line, pLine[2:4])
+                minDist = min((dist1, dist2, dist3, dist4))
+                if minDist < 50:
+                    localScore = (angleTh-angle) * 200
+                    dist1 = np.sum((pLine[0:2] - line[0:2])**2)
+                    dist2 = np.sum((pLine[0:2] - line[2:4])**2)
+                    dist3 = np.sum((pLine[2:4] - line[0:2])**2)
+                    dist4 = np.sum((pLine[2:4] - line[2:4])**2)
+                    localScore += (min(dist1, dist2) + min(dist3, dist4))**2
+                    localScore += minDist**2
+                    if minScore > localScore:
+                        minScore = localScore
+                        mini = i
         if mini != -1:
             lines = np.delete(lines, mini, axis=0)
-        score += 1e3 - minDist
+        score += 1e3 - minScore
     return score
 
 def orderLines(lines):
@@ -213,7 +228,7 @@ def orderLines(lines):
         vec = line[2:4] - line[0:2]
         dist.append(np.sum(vec**2))
     dist = np.asarray(dist)
-    dist = dist.argsort()
+    dist = dist.argsort()[::-1]
     return lines[dist]
 
 def selectInOrderGenerator(size):
@@ -226,13 +241,15 @@ def selectInOrderGenerator(size):
             out[1] = out[0]+1
         yield np.array(out)
 
-def showImgWithLines(image, lines, title='img_with_lines', waitKey=True):
+def showImgWithLines(image, lines, title='img_with_lines', waitKey=True, points = []):
     img_with_lines = np.copy(image)
     for line in lines:
         line = line.astype(np.int32)
         img_with_lines = cv2.line(img_with_lines, (line[0], line[1]), (line[2], line[3]), (255, 0, 0), 2)
         img_with_lines = cv2.circle(img_with_lines, (line[0], line[1]), 2, (255, 80, 0), 3)
         img_with_lines = cv2.circle(img_with_lines, (line[2], line[3]), 2, (255, 80, 0), 3)
+    for point in points:
+        img_with_lines = cv2.circle(img_with_lines, point.astype(np.int32), 4, (0, 255, 0), -1)
     aspect_ratio = image.shape[1]/image.shape[0]
     res = max(image.shape[:2])
     res = res if res < 400 else 400
@@ -248,7 +265,7 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
     print('number of lines: ', nLines)
 
     ### VISUAL DEBUG ###
-    showImgWithLines(image, lines, 'before Filter', False)
+    # showImgWithLines(image, lines, 'before Filter', False)
     ### END VISUAL DEBUG ###
 
     print('removing lines too close...')
@@ -415,9 +432,9 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         
         # print(tennis_court_projected_points)
         ### VISUAL DEBUG ###
-        img_with_projected_lines = np.copy(image)
-        for line in tennis_court_model_lines:
-            img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+        # img_with_projected_lines = np.copy(image)
+        # for line in tennis_court_model_lines:
+        #     img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
         # for model_point in model_points_idx:
         #     img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
         # for select_point in select_points_idx:
@@ -458,19 +475,21 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
         cv2.imshow('window', img)
         cv2.waitKey(0)
         """
-        # if score > 0:
-        #     print(score)
-        #     cv2.imshow('img_with_projected_lines', img_with_projected_lines)
-        #     cv2.waitKey(0)
 
         if best_score < score:
             best_score = score
             best_RT_matrix = RT_matrix
             best_fitting_points = select_points
             best_projected_points = tennis_court_projected_points
-            img_with_projected_lines = np.copy(image)
-            if best_score > 100:
-                break
+        # if score > -650000:
+        #     showImgWithLines(image, projected_lines, 'curr best', False, points=select_points)
+        #     model_img = np.zeros((318, 150, 3), dtype=np.uint8)
+        #     for line in tennis_court_model_lines:
+        #         model_img = cv2.line(model_img, tennis_court_model_points[line[0]].astype(np.int32), tennis_court_model_points[line[1]].astype(np.int32), (0, 120, 255), thickness=2)
+        #     for point in select_model_points:
+        #         model_img = cv2.circle(model_img, point.astype(np.int32), 4, (0, 255, 0), -1)
+        #     cv2.imshow("model", model_img)
+        #     cv2.waitKey(0)
 
         if i% 50 == 0:
             print("\rfitting attempts: ",i,"  best score: ", best_score, end='')
