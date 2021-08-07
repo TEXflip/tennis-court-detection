@@ -149,7 +149,7 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
     img_with_lines = np.copy(image)
     for line in lines:
         line = line.astype(np.int32)
-        img_with_lines = cv2.line(img_with_lines, line[0:2], line[2:4], (255, 80, 0), thickness = 2)
+        img_with_lines = cv2.line(img_with_lines, tuple(line[0:2]), tuple(line[2:4]), (255, 80, 0), thickness = 2)
     cv2.imshow('img_with_lines', img_with_lines)
     cv2.waitKey(0)
     ### END VISUAL DEBUG ###
@@ -172,7 +172,7 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
     print(np.amax(tennis_court_model_points, axis=0).shape)
     img_with_projected_lines = np.zeros(np.append(np.amax(tennis_court_model_points, axis=0)[[1,0]], [3]))
     for idx in tennis_court_point_idx:
-       img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_model_points[idx].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+       img_with_projected_lines = cv2.circle(img_with_projected_lines, tuple(tennis_court_model_points[idx].astype(np.int32)), 4, (255, 0, 0), thickness=-1)
     
     cv2.imshow('model', img_with_projected_lines)
     cv2.waitKey(0)
@@ -183,11 +183,11 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
     tennis_court_projected_points = tennis_court_projected_points.T
     img_with_projected_lines = np.copy(image)
     for line in tennis_court_model_lines:
-        img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+        img_with_projected_lines = cv2.line(img_with_projected_lines, tuple(tennis_court_projected_points[line[0]][0:2].astype(np.int32)), tuple(tennis_court_projected_points[line[1]][0:2].astype(np.int32)), (255, 0, 0), thickness=2)
     for model_point in tennis_court_point_idx:
-        img_with_projected_lines = cv2.circle(img_with_projected_lines, tennis_court_projected_points[model_point][0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+        img_with_projected_lines = cv2.circle(img_with_projected_lines, tuple(tennis_court_projected_points[model_point][0:2].astype(np.int32)), 4, (255, 0, 0), thickness=-1)
     for original_point in original_points:
-        img_with_projected_lines = cv2.circle(img_with_projected_lines, original_point.astype(np.int32), 2, (0, 255, 0), thickness=-1)
+        img_with_projected_lines = cv2.circle(img_with_projected_lines, tuple(original_point.astype(np.int32)), 2, (0, 255, 0), thickness=-1)
     cv2.imshow('img_with_projected_lines', img_with_projected_lines)
     cv2.waitKey(0)
     
@@ -199,24 +199,24 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
 
     model_image = np.zeros(np.amax(tennis_court_model_points, axis=0)[[1,0]] + 1)
     for line in tennis_court_model_lines:
-        model_image = cv2.line(model_image, tennis_court_model_points[line[0]], tennis_court_model_points[line[1]], (255), thickness=2)
+        model_image = cv2.line(model_image, tuple(tennis_court_model_points[line[0]]), tuple(tennis_court_model_points[line[1]]), (255), thickness=2)
 
     for i in range(100000):
-        select_lines_idx = np.random.choice(lines.shape[0], size=(9,), replace=False)
-        # select_points_idx = np.random.choice(points.shape[0], size=(4,), replace=False) # scegliere in base a linee casuali invece di punti casuali
-        select_model_lines_idx = np.random.choice(tennis_court_model_lines.shape[0], size=(6,), replace=False)
-        # model_points_idx = np.random.choice(tennis_court_model_points.shape[0], size=(4,), replace=False)
+        # select_lines_idx = np.random.choice(lines.shape[0], size=(9,), replace=False)
+        select_points_idx = np.random.choice(points.shape[0], size=(4,), replace=False) # scegliere in base a linee casuali invece di punti casuali
+        # select_model_lines_idx = np.random.choice(tennis_court_model_lines.shape[0], size=(6,), replace=False)
+        model_points_idx = np.random.choice(tennis_court_model_points.shape[0], size=(4,), replace=False)
 
-        select_points = np.asarray([np.append(lines[select_lines_idx,0], lines[select_lines_idx,2]),np.append(lines[select_lines_idx,1], lines[select_lines_idx,3])]).T
+        # select_points = np.asarray([np.append(lines[select_lines_idx,0], lines[select_lines_idx,2]),np.append(lines[select_lines_idx,1], lines[select_lines_idx,3])]).T
         # print("select_points")
         # print(select_points)
-        # select_points = points[select_points_idx]
+        select_points = points[select_points_idx]
         
         # select_model_points = tennis_court_model_points[np.append(tennis_court_model_lines[select_model_lines_idx,0], tennis_court_model_lines[select_model_lines_idx,1])]
-        select_model_points = tennis_court_model_points[np.append(tennis_court_model_lines[:,0], tennis_court_model_lines[:,1])]
+        # select_model_points = tennis_court_model_points[np.append(tennis_court_model_lines[:,0], tennis_court_model_lines[:,1])]
         # print("select_model_points")
         # print(select_model_points)
-        # select_model_points = tennis_court_model_points[model_points_idx]
+        select_model_points = tennis_court_model_points[model_points_idx]
 
         # print("homography points:")
         # print(points[select_points_idx].astype(np.float32))
@@ -227,12 +227,15 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
         # print(mask)
         # print("RT_matrix:")
         # print(RT_matrix)
+        if RT_matrix is None:
+            print("Roto Translation matrix is zero")
+            continue
         if np.sum(np.isinf(RT_matrix)) != 0:
             print("RT matrix contain an infinite")
             continue
-        # if np.sum(mask) != 4:
-        #     print("mask is different than 4")
-        #     continue
+        if np.sum(mask) != 4:
+            print("mask is different than 4")
+            continue
         # img_wrap = cv2.warpPerspective(image, RT_matrix, (78, 36))
         # print(img_wrap.shape)
         # cv2.imshow('img_wrap', img_wrap)
@@ -246,11 +249,11 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
         ### VISUAL DEBUG ###
         img_with_projected_lines = np.copy(image)
         for line in tennis_court_model_lines:
-            img_with_projected_lines = cv2.line(img_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+            img_with_projected_lines = cv2.line(img_with_projected_lines, tuple(tennis_court_projected_points[line[0]][0:2].astype(np.int32)), tuple(tennis_court_projected_points[line[1]][0:2].astype(np.int32)), (255, 0, 0), thickness=2)
         for model_point in select_model_points:
-            img_with_projected_lines = cv2.circle(img_with_projected_lines, model_point[0:2].astype(np.int32), 4, (255, 0, 0), thickness=-1)
+            img_with_projected_lines = cv2.circle(img_with_projected_lines, tuple(model_point[0:2].astype(np.int32)), 4, (255, 0, 0), thickness=-1)
         for select_point in select_points:
-            img_with_projected_lines = cv2.circle(img_with_projected_lines, select_point.astype(np.int32), 2, (0, 255, 0), thickness=-1)
+            img_with_projected_lines = cv2.circle(img_with_projected_lines, tuple(select_point.astype(np.int32)), 2, (0, 255, 0), thickness=-1)
         cv2.imshow('img_with_projected_lines', img_with_projected_lines)
         # cv2.waitKey(0)
         ### END DEBUG ###
@@ -265,7 +268,7 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
 
         mask_with_projected_lines = np.zeros(image.shape[:2], np.uint8)
         for line in tennis_court_model_lines:
-            mask_with_projected_lines = cv2.line(mask_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
+            mask_with_projected_lines = cv2.line(mask_with_projected_lines, tuple(tennis_court_projected_points[line[0]][0:2].astype(np.int32)), tuple(tennis_court_projected_points[line[1]][0:2].astype(np.int32)), (255), thickness=2)
         colors_to_predict = image[mask_with_projected_lines.astype(bool)]
         if colors_to_predict.shape[0] == 0:
             print("No color to predict")
@@ -328,7 +331,7 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
     print("best_score:", best_score)
     img_with_projected_lines = np.copy(image)
     for line in tennis_court_model_lines:
-        img_with_projected_lines = cv2.line(img_with_projected_lines, best_projected_points[line[0]][0:2].astype(np.int32), best_projected_points[line[1]][0:2].astype(np.int32), (255, 0, 0), thickness=2)
+        img_with_projected_lines = cv2.line(img_with_projected_lines, tuple(best_projected_points[line[0]][0:2].astype(np.int32)), tuple(best_projected_points[line[1]][0:2].astype(np.int32)), (255, 0, 0), thickness=2)
     cv2.imshow('window', img_with_projected_lines)
     cv2.waitKey(0)
     
