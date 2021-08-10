@@ -197,7 +197,7 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
 
     model_image = np.zeros(np.amax(tennis_court_model_points, axis=0)[[1,0]] + 1)
     for line in tennis_court_model_lines:
-        model_image = cv2.line(model_image, tennis_court_model_points[line[0]], tennis_court_model_points[line[1]], (255), thickness=2)
+        model_image = cv2.line(model_image, tuple(tennis_court_model_points[line[0]]), tuple(tennis_court_model_points[line[1]]), (255), thickness=2)
 
     # create 2 generators to do line selection
     lineGenerator = selectInOrderGenerator(lines.shape[0])
@@ -235,7 +235,7 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
 
         mask_with_projected_lines = np.zeros(image.shape[:2], np.uint8)
         for line in tennis_court_model_lines:
-            mask_with_projected_lines = cv2.line(mask_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
+            mask_with_projected_lines = cv2.line(mask_with_projected_lines, tuple(tennis_court_projected_points[line[0]][0:2].astype(np.int32)), tuple(tennis_court_projected_points[line[1]][0:2].astype(np.int32)), (255), thickness=2)
         colors_to_predict = image[mask_with_projected_lines.astype(bool)]
         if colors_to_predict.shape[0] == 0:
             print("No color to predict")
