@@ -159,42 +159,6 @@ def showImgWithLines(image, lines, title='img_with_lines', waitKey=True):
     if waitKey:
         cv2.waitKey(0)
 
-def computeLineScore(projectedLines, lines, angleTh = 4):
-    score = 0
-    for pLine in projectedLines:
-        v1 = pLine[2:4] - pLine[0:2]
-        len1 = np.linalg.norm(v1)
-        minScore = 1e5
-        mini = -1
-        for i, line in enumerate(lines):
-            localScore = 0
-            v2 = line[2:4] - line[0:2]
-            len2 = np.linalg.norm(v2)
-            dot = abs(np.dot(v1 / len1, v2 / len2))
-            dot = min(1, dot)
-            angle = np.arccos(dot) * 180 / np.pi
-            if angle < angleTh:
-                dist1 = pointLineMinDist(pLine, line[0:2])
-                dist2 = pointLineMinDist(pLine, line[2:4])
-                dist3 = pointLineMinDist(line, pLine[0:2])
-                dist4 = pointLineMinDist(line, pLine[2:4])
-                minDist = min((dist1, dist2, dist3, dist4))
-                if minDist < 50:
-                    localScore = (angleTh-angle) * 200
-                    dist1 = np.sum((pLine[0:2] - line[0:2])**2)
-                    dist2 = np.sum((pLine[0:2] - line[2:4])**2)
-                    dist3 = np.sum((pLine[2:4] - line[0:2])**2)
-                    dist4 = np.sum((pLine[2:4] - line[2:4])**2)
-                    localScore += (min(dist1, dist2) + min(dist3, dist4))**2
-                    localScore += minDist**2
-                    if minScore > localScore:
-                        minScore = localScore
-                        mini = i
-        if mini != -1:
-            lines = np.delete(lines, mini, axis=0)
-        score += 1e3 - minScore
-    return score
-
 def test_single_image(inference, impath, output_path = "", threshold = 0.97):
     # Load and extract lines using LETR
     image = cv2.imread(impath)
@@ -230,6 +194,17 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
     # create 2 generators to do line selection
     lineGenerator = selectInOrderGenerator(lines.shape[0])
     modelLineGenerator = selectInOrderGenerator(tennis_court_model_lines.shape[0])
+
+    mask = np.zeros((image.shape[0], image.shape[1]), dtype=image.dtype)
+    for line in lines:
+        line = line.astype(np.int32)
+        mask = cv2.line(mask, (line[0], line[1]), (line[2], line[3]), 255, 6)
+
+    mask = mask.astype(bool)
+    color_list = image[mask]
+    gm = GaussianMixture(n_components=3, random_state=0).fit(color_list)
+    line_gaussian = gm.predict([[255, 255, 255]])[0]
+
 
     for i in range(10000):
         # select model and image line pairs
@@ -275,7 +250,12 @@ def test_single_image(inference, impath, output_path = "", threshold = 0.97):
         projected_lines  = np.asarray(projected_lines)
 
         # compute score
-        score = computeLineScore(projected_lines, lines)
+        mask_with_projected_lines = np.zeros(image.shape[:2], np.uint8)
+        for line in tennis_court_model_lines:
+            mask_with_projected_lines = cv2.line(mask_with_projected_lines, tennis_court_projected_points[line[0]][0:2].astype(np.int32), tennis_court_projected_points[line[1]][0:2].astype(np.int32), (255), thickness=2)
+        colors_to_predict = image[mask_with_projected_lines.astype(bool)]
+        best_gaussian = gm.predict(colors_to_predict)
+        score = np.sum(best_gaussian == line_gaussian)
         
         # compare with the best
         if best_score < score:
