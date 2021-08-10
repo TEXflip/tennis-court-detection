@@ -367,7 +367,8 @@ def test_single_image(cfg, impath, model, device, output_path = "", threshold = 
             projected_lines.append(np.append(tennis_court_projected_points[line[0]][0:2], tennis_court_projected_points[line[1]][0:2]))
         projected_lines  = np.asarray(projected_lines)
         score = computeLineScore(projected_lines, lines)
-lineExtension
+
+        if best_score < score:
             best_score = score
             best_RT_matrix = RT_matrix
             best_fitting_points = select_points
