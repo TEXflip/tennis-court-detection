@@ -169,7 +169,7 @@ In this project have are been implemented 3 scoring techniques: template matchin
 
 #### Line-based Scoring
 
-![](D:\Dati\Python\sport-court-detection\assets\line-scoring.PNG)
+![line-scoring](./assets/line-scoring.PNG)
 
 * for each pair of lines compute the local score only if distance(AB, CD) < *distance threshold* and α < *angle threshold*
 * local score(AB, CD)=min(AC,BD,AD,BC)² + (min(AC,CB) + min(BD,BC))² - 200α
@@ -179,16 +179,16 @@ In this project have are been implemented 3 scoring techniques: template matchin
 
 ### HAWP with Gaussian Scoring
 
-![](D:\Dati\Python\sport-court-detection\assets\HAWP_gaussian_scoring.PNG)
+![HAWP_gaussian_scoring](./assets/HAWP_gaussian_scoring.PNG)
 
 ### HAWP with Line Scoring
 
-![](D:\Dati\Python\sport-court-detection\assets\HAWP_line_scoring.PNG)
+![HAWP_line_scoring](./assets/HAWP_line_scoring.PNG)
 
 ### LETR with Gaussian Scoring
 
-![LETR_gaussian_scoring](D:\Dati\Python\sport-court-detection\assets\LETR_gaussian_scoring.png)
+![LETR_gaussian_scoring](./assets/LETR_gaussian_scoring.png)
 
 ### LETR with Line Scoring
 
-![LETR_line_scoring](D:\Dati\Python\sport-court-detection\assets\LETR_line_scoring.png)
+![LETR_line_scoring](./assets/LETR_line_scoring.png)
