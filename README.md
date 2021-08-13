@@ -142,7 +142,53 @@ It removes lonely lines and it keeps only big intersected groups of lines.
 * extend the lines with min(n,m)/20
 * init graph G with set of nodes = set of lines
 * for each couple of line a,b:
-    - if a intersect b connect them on the graph G
+    - if a intersect b, connect them on the graph G
 * compute the connected components of G
 * keep only the components > 3 (or in hard mode keep only biggest 2 connected components)
 
+### Homography
+
+The homography is computed with ```findHomography()``` function of openCV (so RANSAC or other algorithms can be used).
+
+Then is searched the best homography trying all the combinations of the points of 2 lines with 2 lines of the model template and using a scoring.
+
+### Scoring
+
+In this project have are been implemented 3 scoring techniques: template matching based, gaussian mixture based and line based, but only the last 2 give reasonable results and will be described.
+
+#### Gaussian-based Scoring
+
+* create a mask *LinesMask* from n×m black image and draw the lines (with thickness=6px)
+* apply *LinesMask* on the image
+* Init a gaussian mixture with 3 gaussians and the precedently masked image
+* get the gaussian *g* fitting (255,255,255) color or the court line color
+* get the projected lines of the model template using the Homography matrix
+* create a mask *ModelLinesMask* using the projected lines
+* apply ModelLinesMask on the image
+* the score is computed as the sum of the pixels of the precedently masked image predicted with *g*
+
+#### Line-based Scoring
+
+![](D:\Dati\Python\sport-court-detection\assets\line-scoring.PNG)
+
+* for each pair of lines compute the local score only if distance(AB, CD) < *distance threshold* and α < *angle threshold*
+* local score(AB, CD)=min(AC,BD,AD,BC)² + (min(AC,CB) + min(BD,BC))² - 200α
+* total score is the sum of the smallest local score of each pair of lines (so smaller is better)
+
+## Results
+
+### HAWP with Gaussian Scoring
+
+![](D:\Dati\Python\sport-court-detection\assets\HAWP_gaussian_scoring.PNG)
+
+### HAWP with Line Scoring
+
+![](D:\Dati\Python\sport-court-detection\assets\HAWP_line_scoring.PNG)
+
+### LETR with Gaussian Scoring
+
+![LETR_gaussian_scoring](D:\Dati\Python\sport-court-detection\assets\LETR_gaussian_scoring.png)
+
+### LETR with Line Scoring
+
+![LETR_line_scoring](D:\Dati\Python\sport-court-detection\assets\LETR_line_scoring.png)
