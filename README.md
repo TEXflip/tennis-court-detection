@@ -4,8 +4,8 @@ This repository contain the code that given a image or a series of images, fit a
 
 ### Repository structure:
 
-* ```modelFitting.py```: run with HAWP model and line scoring. *Commands ex:* python modelFitting.py --config-file hawp/config-files/hawp.yaml --img testing-dataset/tennis_court/15.jpeg
-* ```modelFitting_letr.py```: run using the LETR model and line scoring. *Commands ex:* python modelFitting_letr.py --checkpoint-filepath LETR/best_checkpoint.pth --img testing-dataset/tennis_court/15.jpeg
+* ```modelFitting.py```: run with HAWP model and line scoring.
+* ```modelFitting_letr.py```: run using the LETR model and line scoring.
 * ```training``` contain all the scripts to build the datasets to transfer the neural networks
 * ```testing-dataset```: dataset with sample images of tennis, basket and football courts, it is used to test the performance of the algorithm, it include also the annotation file for the tennis court fields
 * ```training-dataset```: dataset with sample images of tennis courts from various viewpoint, contain also the annotation file used to make transfer learning to LETR
@@ -93,9 +93,14 @@ PYTHONPATH=$PYTHONPATH:./LETR/src python modelFitting_letr.py --checkpoint-filep
 
 ### Run the HAWP-based system
 
+To run the HAWP-based pipeline is it necessary to first download the pretrained model, please reference to the [HAWP repository](https://github.com/cherubicXN/hawp) for it.
+
+Then it is possible to run the pipeline using the command (replace the square brackets with the corresponding paths):
+
 ```bash
-PYTHONPATH=$PYTHONPATH:./LETR/src python modelFitting_letr.py --checkpoint-filepath [last stage checkpoint filepath] --img [image filepath] --output_path [dirpath where save the result]
+python modelFitting.py --config-file [hawp config filepath, in the default config should be hawp/config-files/hawp.yaml] --img [image filepath] --output_path [dirpath where save the result]
 ```
+
 
 ## How it works:
 
