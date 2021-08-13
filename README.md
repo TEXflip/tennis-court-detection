@@ -101,29 +101,42 @@ PYTHONPATH=$PYTHONPATH:./LETR/src python modelFitting_letr.py --checkpoint-filep
 
 In the image below is illustrated the flow of the image
 
-!(assets/scheme.png)[assets/scheme.png]
+![](./assets/scheme.png)
 
 ### Filters:
 
+In order to reduce the number of lines, 3 filters have been implemented:
+![](./assets/filters.png)
+
 #### Line Filter:
 
-for every couple of lines $\overline{\rm AB}$ and $\overline{\rm CD}$: if the angle of the intersection between $\overline{\rm AB}$ and $\overline{\rm CD}$ is smaller than a threshold and $min(\overline{\rm AC},\overline{\rm AD},\overline{\rm BC},\overline{\rm BD}) < threshold$ keeps the shorter line.
+It mainly removes the overlapped lines.
+
+for every couple of lines AB and CD: if the angle of the intersection between AB and CD is smaller than a threshold and min(AC,AD,BC,BD) < threshold keeps the shorter line.
+
 
 #### Mask Filter:
 
-* create a mask *LinesMask* from &n\times m& black image and draw the lines (with thickenss=6px)
+It removes the lines not overlapping the white (or the color of the court lines) pixels.
+
+* create a mask *LinesMask* from n×m black image and draw the lines (with thickness=6px)
 * apply mask on the image
 * Init a gaussian mixture with 3 gaussians and the masked image
-* get the gaussian $g_{white}$ fitting (255,255,255) color or the court line color
-* produce a mask *CandidateLinesMask* by selecting the pixels fitted with $g_{white}$ and applying *LinesMask*
+* get the gaussian g fitting (255,255,255) color or the court line color
+* produce a mask *CandidateLinesMask* by selecting the pixels fitted with g and applying *LinesMask*
 * for each line:
-    - produce a &n\times m& black image and draw the line
-    - get the number of pixels $p_{overlapped}$ overlapped with *CandidateLinesMask*
-    - keep the lines with $p_{overlapped}>0.5*\text{length of the line}$
+    - produce a n×m$ black image and draw the line
+    - get the number of pixels p overlapped with *CandidateLinesMask*
+    - keep the lines with p>0.5*(length of the line)
 
 #### Graph Filter:
 
-* extend the lines with &min(n,m)/20&
-* init graph &G& with set of nodes = set of lines
-* for each couple of line $a,b$:
-    - if $a$ intersect $b$ connect them on the graph $G$
+It removes lonely lines and it keeps only big intersected groups of lines.
+
+* extend the lines with min(n,m)/20
+* init graph G with set of nodes = set of lines
+* for each couple of line a,b:
+    - if a intersect b connect them on the graph G
+* compute the connected components of G
+* keep only the components > 3 (or in hard mode keep only biggest 2 connected components)
+
