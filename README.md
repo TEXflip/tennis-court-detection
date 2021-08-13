@@ -83,14 +83,19 @@ PYTHONPATH=$PYTHONPATH:./LETR/src python -m torch.distributed.launch \
 
 At this point it is possible to use the checkpoint of the last stage to evaluate the performance of the system.
 
-### Run the application
+### Run the LETR-based system
 
-For running the LETR part with the 
+For running the LETR-based system with line scoring use the following command, replacing the square brackets with the corresponding dirpath.
+
 ```bash
 PYTHONPATH=$PYTHONPATH:./LETR/src python modelFitting_letr.py --checkpoint-filepath [last stage checkpoint filepath] --img [image filepath] --output_path [dirpath where save the result]
 ```
 
+### Run the HAWP-based system
 
+```bash
+PYTHONPATH=$PYTHONPATH:./LETR/src python modelFitting_letr.py --checkpoint-filepath [last stage checkpoint filepath] --img [image filepath] --output_path [dirpath where save the result]
+```
 
 ## How it works:
 
@@ -118,4 +123,7 @@ for every couple of lines $\overline{\rm AB}$ and $\overline{\rm CD}$: if the an
 
 #### Graph Filter:
 
-* extend the lines (3 or 4 pixes)
+* extend the lines with &min(n,m)/20&
+* init graph &G& with set of nodes = set of lines
+* for each couple of line $a,b$:
+    - if $a$ intersect $b$ connect them on the graph $G$
