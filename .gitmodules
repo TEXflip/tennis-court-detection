@@ -1,3 +1,6 @@
 [submodule "LETR"]
 	path = LETR
 	url = https://github.com/mlpc-ucsd/LETR.git
+[submodule "hawp"]
+	path = hawp
+	url = https://github.com/cherubicXN/hawp.git

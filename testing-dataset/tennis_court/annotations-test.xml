@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+<annotations>
+  <version>1.1</version>
+  <meta>
+    <task>
+      <id>7</id>
+      <name>Tennis-court test</name>
+      <size>23</size>
+      <mode>annotation</mode>
+      <overlap>0</overlap>
+      <bugtracker></bugtracker>
+      <created>2021-05-22 20:05:07.932079+00:00</created>
+      <updated>2021-05-22 22:37:31.115639+00:00</updated>
+      <start_frame>0</start_frame>
+      <stop_frame>22</stop_frame>
+      <frame_filter></frame_filter>
+      <labels>
+        <label>
+          <name>service-centerline</name>
+          <color>#553dd6</color>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>baseline</name>
+          <color>#5986b3</color>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>sideline-doubles</name>
+          <color>#33ddff</color>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>sideline-singles</name>
+          <color>#24b353</color>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>service-line</name>
+          <color>#b25050</color>
+          <attributes>
+          </attributes>
+        </label>
+      </labels>
+      <segments>
+        <segment>
+          <id>7</id>
+          <start>0</start>
+          <stop>22</stop>
+          <url>http://cvat.cicd-server.mbortolon.eu:30033/?id=7</url>
+        </segment>
+      </segments>
+      <owner>
+        <username>mbortolon</username>
+        <email>m.bortolon.97@gmail.com</email>
+      </owner>
+      <assignee></assignee>
+    </task>
+    <dumped>2021-05-22 22:41:55.094718+00:00</dumped>
+  </meta>
+  <image id="0" name="01.jpeg" width="474" height="331">
+    <polyline label="service-line" occluded="0" source="manual" points="190.20,132.60;279.90,133.10" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="474.00,255.37;282.76,126.12" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="282.68,126.11;185.48,125.41" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="185.58,125.31;0.00,249.96" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="0.00,281.53;474.00,281.53" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="23.20,281.60;198.06,125.50" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="447.60,281.40;271.36,125.92" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="336.20,183.20;134.49,182.31" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="235.90,182.70;234.90,132.90" z_order="0">
+    </polyline>
+  </image>
+  <image id="1" name="02.jpeg" width="474" height="279">
+    <polyline label="service-centerline" occluded="0" source="manual" points="244.43,55.99;252.35,130.01" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="107.10,200.50;407.37,189.22" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="407.86,188.98;306.20,37.40" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="306.10,37.50;177.44,39.45" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="290.30,37.80;371.10,190.60" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="299.30,55.10;188.50,57.40" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="193.94,39.22;145.83,199.12" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="177.42,39.54;107.07,200.31" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="337.60,127.40;165.80,132.80" z_order="0">
+    </polyline>
+  </image>
+  <image id="2" name="03.jpeg" width="1200" height="500">
+    <polyline label="service-line" occluded="0" source="manual" points="692.40,352.90;342.10,306.30" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="538.12,455.47;1039.12,259.65" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="1038.10,258.60;718.20,241.40" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="718.18,241.28;38.79,337.64" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="38.50,337.64;538.28,455.43" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="443.93,433.04;991.71,255.92" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="938.50,273.20;676.00,255.00" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="750.30,243.20;78.10,347.10" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="494.80,326.70;794.60,263.40" z_order="0">
+    </polyline>
+  </image>
+  <image id="3" name="04.jpeg" width="1280" height="878">
+    <polyline label="service-line" occluded="0" source="manual" points="892.72,511.55;391.02,510.54" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="48.60,659.40;1222.87,661.66" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="1222.40,661.66;783.41,394.27" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="783.30,394.29;507.90,393.09" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="507.70,392.99;48.30,659.50" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="197.12,660.14;542.40,393.20" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="519.63,410.95;770.62,411.67" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="748.88,393.96;1077.20,661.40" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="643.46,411.20;641.72,511.23" z_order="0">
+    </polyline>
+  </image>
+  <image id="4" name="05.jpeg" width="720" height="540">
+    <polyline label="service-line" occluded="0" source="manual" points="102.08,196.49;491.00,235.06" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="354.75,496.76;0.00,359.11" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="146.87,415.73;653.83,149.50" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="354.47,495.94;691.94,150.91" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="0.00,200.95;434.21,142.83" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="691.84,150.98;434.08,142.77" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="632.47,160.74;399.87,153.24" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="0.00,211.95;463.32,143.57" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="252.78,211.46;503.63,156.59" z_order="0">
+    </polyline>
+  </image>
+  <image id="5" name="06.jpeg" width="474" height="316">
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="297.82,299.63;12.50,118.70" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="298.22,299.85;474.00,183.77" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="474.00,147.88;161.70,110.20" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="12.70,118.70;161.80,110.20" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="37.42,117.39;368.41,253.58" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="160.96,168.16;342.76,137.08" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="474.00,154.71;146.38,111.08" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="54.70,124.40;181.20,115.70" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="125.70,119.40;274.11,148.80" z_order="0">
+    </polyline>
+  </image>
+  <image id="6" name="07.jpeg" width="1000" height="487">
+    <polyline label="service-centerline" occluded="0" source="manual" points="454.94,363.76;264.40,225.70" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="456.30,487.00;983.62,449.47" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="983.80,449.23;412.79,188.63" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="412.80,188.51;5.47,193.47" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="5.41,193.56;155.62,487.00" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="275.47,487.00;59.53,192.91" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="193.96,376.00;692.30,352.80" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="897.60,455.60;364.95,189.01" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="86.20,229.30;431.40,222.30" z_order="0">
+    </polyline>
+  </image>
+  <image id="7" name="08.jpeg" width="474" height="247">
+    <polyline label="service-line" occluded="0" source="manual" points="119.52,195.42;117.52,53.12" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="22.20,29.50;23.00,219.30" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="22.97,219.29;438.78,220.38" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="438.78,220.25;439.14,28.13" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="439.02,28.13;22.23,29.57" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="22.38,53.75;439.08,51.56" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="341.78,52.05;342.06,195.62" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="438.72,195.32;22.92,195.62" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="118.32,124.32;341.82,124.52" z_order="0">
+    </polyline>
+  </image>
+  <image id="8" name="09.jpeg" width="533" height="355">
+    <polyline label="service-line" occluded="0" source="manual" points="409.50,235.10;183.40,218.90" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="447.04,315.35;477.09,195.23" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="476.79,195.22;327.10,193.30" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="10.62,237.57;327.52,193.37" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="35.00,242.20;344.07,193.47" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="10.70,237.80;447.00,315.40" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="336.69,297.41;455.75,195.10" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="449.00,201.00;318.45,197.56" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="278.40,225.90;377.11,199.14" z_order="0">
+    </polyline>
+  </image>
+  <image id="9" name="10.jpeg" width="356" height="195">
+    <polyline label="service-line" occluded="0" source="manual" points="39.40,93.00;140.29,82.14" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="142.00,183.38;9.58,89.30" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="142.10,183.40;356.00,114.13" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="356.00,104.55;130.70,77.40" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="10.10,89.10;130.80,77.40" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="195.00,166.30;27.49,87.52" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="356.00,111.71;116.30,78.90" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="250.60,97.20;104.90,123.90" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="189.79,108.34;94.59,87.14" z_order="0">
+    </polyline>
+  </image>
+  <image id="10" name="11.jpeg" width="1920" height="1280">
+    <polyline label="sideline-singles" occluded="0" source="manual" points="355.20,858.90;1039.14,606.85" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="850.70,949.00;1425.65,645.96" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="1425.80,645.99;988.61,601.80" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="988.70,601.70;292.10,847.70" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="1089.41,668.70;749.86,812.27" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="292.10,847.70;850.58,948.83" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="772.47,934.43;1366.76,639.98" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="954.88,844.15;561.04,783.09" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="921.80,650.00;1268.50,689.00" z_order="0">
+    </polyline>
+  </image>
+  <image id="11" name="12.jpeg" width="1124" height="703">
+    <polyline label="sideline-singles" occluded="0" source="manual" points="541.35,215.98;699.00,483.06" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="635.10,251.30;730.40,385.96" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="568.70,262.80;699.93,240.10" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="867.56,444.60;664.60,196.79" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="651.03,402.11;806.79,370.31" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="684.45,193.59;519.85,219.39" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="894.09,438.42;684.45,193.69" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="669.50,489.90;893.99,438.52" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="519.76,219.49;669.40,489.89" z_order="0">
+    </polyline>
+  </image>
+  <image id="12" name="13.jpeg" width="800" height="600">
+    <polyline label="service-centerline" occluded="0" source="manual" points="352.80,293.20;578.94,192.59" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="441.42,426.42;797.40,181.50" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="797.30,181.20;502.33,150.55" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="502.08,150.42;2.80,317.50" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="2.60,317.60;441.40,426.50" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="45.44,328.38;535.15,154.03" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="465.30,178.90;705.60,207.80" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="755.60,177.10;372.40,409.20" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="514.54,323.04;214.38,268.43" z_order="0">
+    </polyline>
+  </image>
+  <image id="13" name="14.jpeg" width="1024" height="591">
+    <polyline label="service-line" occluded="0" source="manual" points="854.98,383.86;250.94,371.62" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="976.19,517.23;923.47,144.06" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="923.47,144.06;385.19,135.57" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="385.22,135.62;28.85,492.81" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="28.95,492.92;976.12,517.45" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="854.69,514.24;855.00,143.07" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="855.10,196.30;406.90,189.50" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="452.20,136.40;144.68,495.98" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="550.20,378.00;630.10,192.90" z_order="0">
+    </polyline>
+  </image>
+  <image id="14" name="15.jpeg" width="800" height="533">
+    <polyline label="baseline" occluded="0" source="manual" points="784.50,475.90;0.00,459.56" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="784.30,475.70;701.66,201.45" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="701.65,201.54;282.58,200.47" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="668.28,474.89;648.55,201.33" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="660.69,367.69;132.27,360.78" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="7.60,459.70;333.50,200.60" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="282.71,200.43;0.00,392.42" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="390.44,364.60;470.20,233.24" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="650.80,235.07;292.10,233.30" z_order="0">
+    </polyline>
+  </image>
+  <image id="15" name="16.jpeg" width="900" height="518">
+    <polyline label="service-centerline" occluded="0" source="manual" points="620.06,262.92;271.14,263.07" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="119.90,103.90;119.17,428.05" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="119.02,427.71;772.21,426.88" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="772.01,426.83;770.91,103.00" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="770.98,103.01;119.90,104.00" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="119.80,141.90;771.00,141.10" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="271.10,141.60;271.10,388.01" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="119.20,388.88;772.09,387.55" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="620.63,387.67;619.60,141.29" z_order="0">
+    </polyline>
+  </image>
+  <image id="16" name="17.jpeg" width="2525" height="1285">
+    <polyline label="baseline" occluded="0" source="manual" points="2232.99,228.02;2234.89,1133.86" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="1774.78,679.92;731.14,680.27" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="1775.30,1019.59;1775.30,344.04" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="290.48,241.02;2232.92,227.70" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="289.91,1014.71;2234.76,1020.78" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="731.73,349.36;730.92,1015.52" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="290.48,351.79;2233.39,341.07" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="289.87,1125.33;290.80,241.00" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="2234.88,1133.87;289.85,1125.36" z_order="0">
+    </polyline>
+  </image>
+  <image id="17" name="18.jpeg" width="1280" height="720">
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="1129.70,624.90;832.40,256.80" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="912.20,465.00;383.82,463.40" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="645.04,294.77;646.05,464.12" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="785.80,256.90;1008.64,624.39" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="482.60,294.60;808.80,294.80" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="291.86,620.95;504.56,256.90" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="173.54,620.49;1129.27,624.95" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="458.26,256.74;173.90,620.37" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="832.52,256.83;458.50,256.96" z_order="0">
+    </polyline>
+  </image>
+  <image id="18" name="19.jpeg" width="852" height="480">
+    <polyline label="sideline-singles" occluded="0" source="manual" points="71.23,125.45;769.50,129.67" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="768.90,408.10;769.49,90.60" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="769.49,90.60;71.19,84.97" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="71.19,84.97;71.12,411.05" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="71.13,411.06;769.01,408.15" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="235.24,126.36;234.40,370.30" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="71.00,370.68;768.81,368.78" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="234.59,247.82;612.20,249.05" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="612.50,128.71;611.90,369.08" z_order="0">
+    </polyline>
+  </image>
+  <image id="19" name="20.jpeg" width="612" height="357">
+    <polyline label="service-centerline" occluded="0" source="manual" points="161.64,177.30;453.40,177.60" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="36.86,52.36;578.16,52.71" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="578.33,52.78;578.07,303.07" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="578.11,303.14;37.26,302.44" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="37.10,302.40;36.70,52.60" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="453.60,83.66;453.30,271.20" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="36.87,271.17;578.05,271.36" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="578.26,83.78;36.79,83.20" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="161.70,83.40;161.62,271.26" z_order="0">
+    </polyline>
+  </image>
+  <image id="20" name="21.jpeg" width="925" height="578">
+    <polyline label="service-line" occluded="0" source="manual" points="219.70,131.90;220.50,443.00" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="912.96,494.99;912.58,80.11" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="912.55,80.07;12.24,78.96" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="12.24,78.96;12.40,494.60" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="12.30,494.80;913.00,495.20" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="913.00,443.20;12.40,443.00" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="12.04,131.60;912.79,133.01" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="705.60,132.70;705.70,443.00" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="705.63,287.23;220.38,288.37" z_order="0">
+    </polyline>
+  </image>
+  <image id="21" name="22.jpeg" width="1120" height="1924">
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="1004.22,1816.82;971.50,98.98" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="870.15,480.12;221.17,477.97" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="552.10,1404.70;546.50,479.10" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="217.90,1404.20;884.59,1405.19" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="222.37,95.51;217.09,1815.34" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="890.85,1816.62;864.50,97.98" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="104.42,1815.23;1004.20,1816.93" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="114.66,95.21;104.47,1815.29" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="971.46,98.48;114.53,95.40" z_order="0">
+    </polyline>
+  </image>
+  <image id="22" name="23.jpeg" width="590" height="332">
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="437.11,231.13;163.59,229.53" z_order="0">
+    </polyline>
+    <polyline label="service-centerline" occluded="0" source="manual" points="374.48,167.61;226.48,166.41" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="374.48,119.91;374.38,215.31" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="163.50,213.70;437.20,215.73" z_order="0">
+    </polyline>
+    <polyline label="service-line" occluded="0" source="manual" points="227.05,118.88;226.05,214.08" z_order="0">
+    </polyline>
+    <polyline label="sideline-singles" occluded="0" source="manual" points="437.41,120.48;164.91,118.48" z_order="0">
+    </polyline>
+    <polyline label="sideline-doubles" occluded="0" source="manual" points="165.33,102.95;437.51,104.76" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="163.50,229.60;165.30,103.00" z_order="0">
+    </polyline>
+    <polyline label="baseline" occluded="0" source="manual" points="437.48,104.69;437.11,231.01" z_order="0">
+    </polyline>
+  </image>
+</annotations>
