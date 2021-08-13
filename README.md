@@ -36,7 +36,8 @@ The required packages to install using are:
 - ```docopt``` tested with __0.6.2__. Other versions probably work without problems
 - ```cv2``` tested with __4.5.1__. We usually recommend to install OpenCV from source. Other version probably work as well, but must be made special attention to the relation with ```PyTorch```
 
-### Pretrained models
+
+### Pretrained models
 
 The already pretrained model is available at [https://raw.githubusercontent.com/TEXflip/sport-court-detection/main/pretrained-model/letr_best_checkpoint.pth](https://raw.githubusercontent.com/TEXflip/sport-court-detection/main/pretrained-model/letr_best_checkpoint.pth).
 
