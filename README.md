@@ -39,7 +39,7 @@ The required packages to install using are:
 
 ### Pretrained models
 
-The already pretrained model is available at [https://raw.githubusercontent.com/TEXflip/sport-court-detection/main/pretrained-model/letr_best_checkpoint.pth](https://raw.githubusercontent.com/TEXflip/sport-court-detection/main/pretrained-model/letr_best_checkpoint.pth).
+The already pretrained model is available at [https://github.com/TEXflip/sport-court-detection/raw/main/pretrained-model/letr_best_checkpoint.pth](https://github.com/TEXflip/sport-court-detection/raw/main/pretrained-model/letr_best_checkpoint.pth).
 
 ### Building dataset for LETR transfer learning
 
