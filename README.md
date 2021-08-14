@@ -35,7 +35,8 @@ The required packages to install using are:
 - ```CocoAPI```. We suggested to install it directly from source with the command ```pip install -U 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'```
 - ```docopt``` tested with __0.6.2__. Other versions probably work without problems
 - ```cv2``` tested with __4.5.1__. We usually recommend to install OpenCV from source. Other version probably work as well, but must be made special attention to the relation with ```PyTorch```
-
+- ```networkx```
+- ```shapely```
 
 ### Pretrained models
 
