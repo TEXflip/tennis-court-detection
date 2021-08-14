@@ -105,6 +105,13 @@ python modelFitting.py --config-file [hawp config filepath, in the default confi
 
 ## How it works:
 
+* The image is feeded to one of the Line Detection Neural Networks
+* The output is a set of lines defined as a couple of 2 points
+* Then the lines are filtered using 3 different filters
+* The resulting lines are used to find an homography
+* for each pair of lines of both lines output and model template, 4 points are used to find the homography and then the projection (using the resulting matrix) is evaluated using one of the two scoring techniques
+* The projection with the best scoring is the final result
+
 In the image below is illustrated the flow of the image
 
 ![](./assets/scheme.png)
