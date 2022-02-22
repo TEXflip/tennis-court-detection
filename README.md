@@ -115,12 +115,12 @@ python modelFitting.py --config-file [hawp config filepath, in the default confi
 
 In the image below is illustrated the flow of the image
 
-![](./assets/scheme.png)
+![](assets/scheme.png)
 
 ### Filters:
 
 In order to reduce the number of lines, 3 filters have been implemented:
-![](./assets/filters.png)
+![](assets/filters.png)
 
 #### Line Filter:
 
@@ -177,7 +177,7 @@ In this project have are been implemented 3 scoring techniques: template matchin
 
 #### Line-based Scoring
 
-![line-scoring](./assets/line-scoring.PNG)
+![line-scoring](assets/line-scoring.PNG)
 
 * for each pair of lines compute the local score only if distance(AB, CD) < *distance threshold* and α < *angle threshold*
 * local score(AB, CD)=min(AC,BD,AD,BC)² + (min(AC,CB) + min(BD,BC))² - 200α
@@ -187,16 +187,16 @@ In this project have are been implemented 3 scoring techniques: template matchin
 
 ### HAWP with Gaussian Scoring
 
-![HAWP_gaussian_scoring](./assets/HAWP_gaussian_scoring.PNG)
+![HAWP_gaussian_scoring](assets/HAWP_gaussian_scoring.PNG)
 
 ### HAWP with Line Scoring
 
-![HAWP_line_scoring](./assets/HAWP_line_scoring.PNG)
+![HAWP_line_scoring](assets/HAWP_line_scoring.PNG)
 
 ### LETR with Gaussian Scoring
 
-![LETR_gaussian_scoring](./assets/LETR_gaussian_scoring.png)
+![LETR_gaussian_scoring](assets/LETR_gaussian_scoring.png)
 
 ### LETR with Line Scoring
 
-![LETR_line_scoring](./assets/LETR_line_scoring.png)
+![LETR_line_scoring](assets/LETR_line_scoring.png)
