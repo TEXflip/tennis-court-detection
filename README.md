@@ -12,7 +12,8 @@ This repository contain the code that given a image or a series of images, fit a
 
 The other branch contain the same file structure, but use different system to score the line fitting. We suggest to use the main branch that are the one that have shown the best results.
 
-## How run
+
+## How to run
 
 ### Installation
 
@@ -40,7 +41,7 @@ The required packages to install using are:
 
 ### Pretrained models
 
-The already pretrained model is available at [https://github.com/TEXflip/sport-court-detection/raw/main/pretrained-model/letr_best_checkpoint.pth](https://github.com/TEXflip/sport-court-detection/raw/main/pretrained-model/letr_best_checkpoint.pth).
+The already pretrained model is available [here](https://drive.google.com/file/d/1kgPfxeYMSED6bu0xWP-KOSgLDukNPj5t/view?usp=sharing).
 
 ### Building dataset for LETR transfer learning
 
@@ -115,12 +116,12 @@ python modelFitting.py --config-file [hawp config filepath, in the default confi
 
 In the image below is illustrated the flow of the image
 
-![](assets/scheme.png)
+![](https://i.imgur.com/deFV6ka.png)
 
 ### Filters:
 
 In order to reduce the number of lines, 3 filters have been implemented:
-![](assets/filters.png)
+![](https://i.imgur.com/6gKphHn.png)
 
 #### Line Filter:
 
@@ -177,7 +178,7 @@ In this project have are been implemented 3 scoring techniques: template matchin
 
 #### Line-based Scoring
 
-![line-scoring](assets/line-scoring.PNG)
+![line-scoring](https://i.imgur.com/9wH58vn.png)
 
 * for each pair of lines compute the local score only if distance(AB, CD) < *distance threshold* and α < *angle threshold*
 * local score(AB, CD)=min(AC,BD,AD,BC)² + (min(AC,CB) + min(BD,BC))² - 200α
@@ -187,16 +188,16 @@ In this project have are been implemented 3 scoring techniques: template matchin
 
 ### HAWP with Gaussian Scoring
 
-![HAWP_gaussian_scoring](assets/HAWP_gaussian_scoring.PNG)
+![HAWP_gaussian_scoring](https://i.imgur.com/vA5Ccto.png)
 
 ### HAWP with Line Scoring
 
-![HAWP_line_scoring](assets/HAWP_line_scoring.PNG)
+![HAWP_line_scoring](https://i.imgur.com/ux6OoG8.png)
 
 ### LETR with Gaussian Scoring
 
-![LETR_gaussian_scoring](assets/LETR_gaussian_scoring.png)
+![LETR_gaussian_scoring](https://i.imgur.com/Kfwi2PT.png)
 
 ### LETR with Line Scoring
 
-![LETR_line_scoring](assets/LETR_line_scoring.png)
+![LETR_line_scoring](https://i.imgur.com/Ci9kWHX.png)

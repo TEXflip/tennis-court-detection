@@ -135,3 +135,5 @@ outputs
 *.pyc
 
 .vscode/settings.json
+
+.assets
